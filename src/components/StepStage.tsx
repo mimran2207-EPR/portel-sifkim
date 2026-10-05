@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Module, Step } from "../content/types";
 import { screenUrl } from "../lib/media";
 import KaraokeText from "./KaraokeText";
-import { sentenceRange } from "../lib/words";
 
 interface Props {
   module: Module;
@@ -89,16 +88,6 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
             <Placeholder module={module} step={step} />
             <HighlightRing step={step} />
           </div>
-        )}
-        {activeWord >= 0 && (
-          <p
-            data-testid="subtitle"
-            data-variant="dark"
-            aria-hidden="true"
-            className="pointer-events-none absolute bottom-[6%] left-1/2 z-10 hidden w-max md:block max-w-[62%] -translate-x-1/2 rounded-xl bg-slate-900/80 px-4 py-2 text-center text-sm leading-relaxed text-white shadow-lg backdrop-blur-sm md:text-lg"
-          >
-            <KaraokeText text={step.script} active={activeWord} range={sentenceRange(step.script, activeWord)} />
-          </p>
         )}
         {presenter && (
           <div

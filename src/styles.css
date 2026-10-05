@@ -134,10 +134,6 @@ body {
   color: #0b5f77;
 }
 
-[data-variant="dark"] .word-spoken {
-  color: rgba(255, 255, 255, 0.7);
-}
-
 /* Voice-reactive avatar: --lvl (0..1) is set every frame from the narration's audio level. */
 .avatar-voice {
   transform: scale(calc(1 + var(--lvl, 0) * 0.04));
