@@ -5,12 +5,14 @@ interface Props {
   onPrev: () => void;
   onNext: () => void;
   onReplay: () => void;
+  narrate: boolean;
+  onToggleNarrate: () => void;
 }
 
 const base =
   "rounded-2xl px-5 py-2.5 font-medium shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0e7c9b] disabled:cursor-not-allowed disabled:opacity-40";
 
-export default function Controls({ isFirst, isLast, finished, onPrev, onNext, onReplay }: Props) {
+export default function Controls({ isFirst, isLast, finished, onPrev, onNext, onReplay, narrate, onToggleNarrate }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
@@ -19,6 +21,15 @@ export default function Controls({ isFirst, isLast, finished, onPrev, onNext, on
         </button>
         <button type="button" className={`${base} bg-white text-[#0e7c9b] hover:bg-slate-50`} onClick={onReplay}>
           <span aria-hidden="true">↻ </span>השמע שוב
+        </button>
+        <button
+          type="button"
+          aria-pressed={narrate}
+          className={`${base} bg-white text-slate-600 hover:bg-slate-50`}
+          onClick={onToggleNarrate}
+        >
+          <span aria-hidden="true">{narrate ? "🔊 " : "🔇 "}</span>
+          {narrate ? "קריינות פעילה" : "קריינות כבויה"}
         </button>
         <button type="button" className={`${base} muni-gradient text-white hover:brightness-105`} onClick={onNext}>
           {isLast ? (

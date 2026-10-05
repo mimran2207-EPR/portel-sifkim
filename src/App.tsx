@@ -6,6 +6,8 @@ import ModuleNav from "./components/ModuleNav";
 import StepStage from "./components/StepStage";
 import AvatarPanel from "./components/AvatarPanel";
 import Controls from "./components/Controls";
+import { moduleIntroUrl } from "./lib/media";
+import { isNarrationEnabled, setNarrationEnabled, stopSpeaking } from "./lib/speech";
 
 function initialIndex(): number {
   const last = loadProgress().last;
@@ -20,6 +22,7 @@ export default function App() {
   const [navOpen, setNavOpen] = useState(false);
   const [replay, setReplay] = useState(0);
   const [navigated, setNavigated] = useState(false);
+  const [narrate, setNarrate] = useState(isNarrationEnabled);
 
   const step = allSteps[index];
   const found = findStep(step.id)!;
@@ -27,6 +30,15 @@ export default function App() {
   const isLast = index === allSteps.length - 1;
   const validIds = new Set(allSteps.map((s) => s.id));
   const doneCount = done.filter((id) => validIds.has(id)).length;
+  const isModuleStart = found.module.steps[0].id === step.id;
+  const introUrl = isModuleStart && found.module.intro ? moduleIntroUrl(found.module.id) : undefined;
+
+  function toggleNarrate() {
+    const next = !narrate;
+    if (!next) stopSpeaking();
+    setNarrationEnabled(next);
+    setNarrate(next);
+  }
 
   useEffect(() => {
     setLast(step.id);
@@ -110,10 +122,12 @@ export default function App() {
                 onPrev={goPrev}
                 onNext={goNext}
                 onReplay={() => setReplay((r) => r + 1)}
+                narrate={narrate}
+                onToggleNarrate={toggleNarrate}
               />
             </div>
             <div className="order-1 md:order-2 lg:order-none lg:min-w-0 lg:max-w-md">
-              <AvatarPanel key={`${step.id}-${replay}`} step={step} />
+              <AvatarPanel key={`${step.id}-${replay}`} step={step} introUrl={introUrl} narrate={narrate} />
             </div>
           </div>
         </main>

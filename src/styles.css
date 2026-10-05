@@ -32,9 +32,29 @@ body {
   animation: muni-pulse 1.6s ease-in-out infinite;
 }
 
+/* Still avatar "talks" while browser narration plays. */
+@keyframes avatar-talk {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(79, 209, 181, 0.6);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 8px rgba(79, 209, 181, 0);
+  }
+}
+
+.avatar-speaking {
+  animation: avatar-talk 0.9s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .highlight-ring {
     animation: none;
     box-shadow: 0 0 0 4px rgba(14, 124, 155, 0.35);
+  }
+  .avatar-speaking {
+    animation: none;
   }
 }
