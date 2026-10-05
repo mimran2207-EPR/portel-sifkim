@@ -139,12 +139,11 @@ export default function App() {
         {`שלב ${index + 1} מתוך ${allSteps.length}: ${step.title}`}
       </div>
       <Header done={doneCount} total={allSteps.length} navOpen={navOpen} onToggleNav={() => setNavOpen((o) => !o)} />
-      {/* Grid (RTL, columns fill right → left):
-            mobile: presenter strip → stage → sticky controls (nav is a drawer)
-            md:     nav | presenter strip above stage
-            lg:     nav | stage | presenter column (left) */}
-      <div className="mx-auto grid w-full max-w-[96rem] flex-1 grid-cols-1 content-start gap-4 p-3 md:grid-cols-[18rem_minmax(0,1fr)] md:gap-6 md:p-6 lg:grid-cols-[20rem_minmax(0,1fr)_16rem] xl:grid-cols-[20rem_minmax(0,1fr)_19rem]">
-        <div className="md:col-start-1 md:row-span-2 md:row-start-1 lg:row-span-1">
+      {/* RTL: nav docks on the right only on wide screens (xl); below that it is a drawer
+            opened from the header, so the screenshot gets the full width. The presenter
+            (avatar) floats over a corner of the screenshot inside StepStage. */}
+      <div className="mx-auto grid w-full max-w-[100rem] flex-1 grid-cols-1 content-start gap-4 p-3 md:gap-6 md:p-6 xl:grid-cols-[17rem_minmax(0,1fr)]">
+        <div className="xl:col-start-1 xl:row-start-1">
           <ModuleNav
             modules={modules}
             currentId={step.id}
@@ -155,19 +154,24 @@ export default function App() {
             onClose={() => setNavOpen(false)}
           />
         </div>
-        <div className="md:col-start-2 md:row-start-1 lg:sticky lg:top-6 lg:col-start-3 lg:self-start">
-          <AvatarPanel
-            key={`${step.id}-${replay}`}
+        <main className="flex min-w-0 flex-col gap-4 xl:col-start-2 xl:row-start-1">
+          <StepStage
+            key={step.id}
+            module={found.module}
             step={step}
-            introUrl={introUrl}
-            narrate={narrate}
+            focusTitle={navigated}
             activeWord={activeWord}
-            onWord={setActiveWord}
-            onFinished={onNarrationFinished}
+            presenter={
+              <AvatarPanel
+                key={`${step.id}-${replay}`}
+                step={step}
+                introUrl={introUrl}
+                narrate={narrate}
+                onWord={setActiveWord}
+                onFinished={onNarrationFinished}
+              />
+            }
           />
-        </div>
-        <main className="flex min-w-0 flex-col gap-4 md:col-start-2 md:row-start-2 lg:row-start-1">
-          <StepStage key={step.id} module={found.module} step={step} focusTitle={navigated} activeWord={activeWord} />
           <div className="sticky bottom-0 z-10 -mx-3 bg-white/95 px-3 py-2 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] backdrop-blur md:mx-0 md:rounded-2xl md:bg-[#f1f6f8]/95 md:shadow-none">
             <Controls
               isFirst={isFirst}

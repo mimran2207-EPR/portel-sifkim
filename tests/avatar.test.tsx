@@ -34,7 +34,7 @@ describe("AvatarPanel playback order", () => {
     const { container } = render(<AvatarPanel step={step} narrate={false} />);
     fireEvent.error(container.querySelector("video")!);
     expect(speak).not.toHaveBeenCalled();
-    expect(screen.getByTestId("speech-bubble")).toHaveTextContent(step.script);
+    expect(screen.getByText("🔇 קריינות כבויה")).toBeInTheDocument();
   });
 
   it("animates the avatar while speaking", () => {
@@ -45,5 +45,23 @@ describe("AvatarPanel playback order", () => {
     const { container } = render(<AvatarPanel step={step} narrate />);
     fireEvent.error(container.querySelector("video")!);
     expect(screen.getByAltText("העוזר הדיגיטלי של EPR מערכות")).toHaveAttribute("data-speaking", "true");
+  });
+
+  it("moves the mouth with the voice level", () => {
+    let level: ((v: number) => void) | undefined;
+    vi.spyOn(narration, "narrate").mockImplementation((_id, _t, h) => {
+      level = h?.onLevel;
+      return () => {};
+    });
+    const { container } = render(<AvatarPanel step={step} narrate />);
+    fireEvent.error(container.querySelector("video")!);
+    const card = container.querySelector(".avatar-3d") as HTMLElement;
+    level?.(0.05);
+    expect(card.dataset.mouth).toBe("0");
+    level?.(0.2);
+    expect(card.dataset.mouth).toBe("1");
+    level?.(0.7);
+    expect(card.dataset.mouth).toBe("2");
+    expect(card.style.getPropertyValue("--lvl")).toBe("0.700");
   });
 });

@@ -21,20 +21,20 @@ export default function ModuleNav({ modules, currentId, done, open, onSelect, on
   return (
     <>
       {open && (
-        <div className="fixed inset-0 z-30 bg-slate-900/40 md:hidden" aria-hidden="true" onClick={onClose} />
+        <div className="fixed inset-0 z-30 bg-slate-900/40 xl:hidden" aria-hidden="true" onClick={onClose} />
       )}
       <nav
         id="module-nav"
         aria-label="תפריט מודולים"
-        className={`fixed inset-y-0 right-0 z-40 flex w-80 max-w-[85vw] flex-col bg-white shadow-xl transition-transform md:sticky md:top-6 md:bottom-auto md:z-auto md:max-h-[calc(100vh-8rem)] md:w-72 md:max-w-none md:shrink-0 md:translate-x-0 md:self-start md:rounded-2xl md:shadow-sm lg:w-80 ${
-          open ? "translate-x-0" : "max-md:invisible translate-x-full"
+        className={`fixed inset-y-0 right-0 z-40 flex w-80 max-w-[85vw] flex-col bg-white shadow-xl transition-transform xl:sticky xl:top-6 xl:bottom-auto xl:z-auto xl:max-h-[calc(100vh-8rem)] xl:max-w-none xl:shrink-0 xl:translate-x-0 xl:self-start xl:rounded-2xl xl:shadow-sm xl:w-auto ${
+          open ? "translate-x-0" : "max-xl:invisible translate-x-full"
         }`}
       >
-        <div className="muni-gradient flex items-center justify-between px-4 py-3 text-white md:rounded-t-2xl">
+        <div className="muni-gradient flex items-center justify-between px-4 py-3 text-white xl:rounded-t-2xl">
           <span className="font-bold">תוכן ההדרכה</span>
           <button
             type="button"
-            className="rounded-lg px-2 text-xl hover:bg-white/15 md:hidden"
+            className="rounded-lg px-2 text-xl hover:bg-white/15 xl:hidden"
             aria-label="סגירת תפריט"
             onClick={onClose}
           >

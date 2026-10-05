@@ -51,3 +51,15 @@ export function wordAtChar(text: string, charIndex: number): number {
   }
   return last;
 }
+
+/** [first, last] word index of the sentence that contains word `index`. */
+export function sentenceRange(text: string, index: number): [number, number] {
+  const words = tokenize(text).filter((t) => t.word >= 0);
+  if (index < 0 || index >= words.length) return [-1, -1];
+  const ends = (w: string) => /[.!?…]["״']?$/.test(w);
+  let from = index;
+  while (from > 0 && !ends(words[from - 1].text)) from--;
+  let to = index;
+  while (to < words.length - 1 && !ends(words[to].text)) to++;
+  return [from, to];
+}

@@ -12,7 +12,7 @@ export default function Header({ done, total, navOpen, onToggleNav }: Props) {
       <div className="flex items-center gap-3 px-4 py-3 md:px-6">
         <button
           type="button"
-          className="rounded-xl px-2 py-1 text-2xl leading-none hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white md:hidden"
+          className="rounded-xl px-2 py-1 text-2xl leading-none hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white xl:hidden"
           aria-label={navOpen ? "סגירת תפריט" : "פתיחת תפריט"}
           aria-expanded={navOpen}
           aria-controls="module-nav"

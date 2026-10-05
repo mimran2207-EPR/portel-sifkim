@@ -1,4 +1,4 @@
-import { tokenize, wordAtChar, wordAtProgress } from "../src/lib/words";
+import { sentenceRange, tokenize, wordAtChar, wordAtProgress } from "../src/lib/words";
 
 const text = "שלום, אני העוזר הדיגיטלי. בואו נתחיל";
 
@@ -32,5 +32,13 @@ describe("wordAtChar", () => {
     expect(wordAtChar(text, 0)).toBe(0);
     expect(wordAtChar(text, text.indexOf("העוזר") + 2)).toBe(2);
     expect(wordAtChar(text, text.length + 5)).toBe(5);
+  });
+});
+
+describe("sentenceRange", () => {
+  it("returns the word range of the sentence containing the word", () => {
+    expect(sentenceRange(text, 0)).toEqual([0, 3]);
+    expect(sentenceRange(text, 4)).toEqual([4, 5]);
+    expect(sentenceRange(text, 99)).toEqual([-1, -1]);
   });
 });

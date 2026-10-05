@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Module, Step } from "../content/types";
 import { screenUrl } from "../lib/media";
 import KaraokeText from "./KaraokeText";
+import { sentenceRange } from "../lib/words";
 
 interface Props {
   module: Module;
@@ -9,6 +10,8 @@ interface Props {
   focusTitle?: boolean;
   /** Word being narrated; highlighted in the caption. */
   activeWord?: number;
+  /** Floating presenter (avatar) drawn over a corner of the screenshot. */
+  presenter?: ReactNode;
 }
 
 function HighlightRing({ step }: { step: Step }) {
@@ -17,7 +20,7 @@ function HighlightRing({ step }: { step: Step }) {
   return (
     <div
       data-testid="highlight"
-      className="highlight-ring pointer-events-none absolute"
+      className="highlight-ring spotlight pointer-events-none absolute"
       style={{ left: `${h.x}%`, top: `${h.y}%`, width: `${h.w}%`, height: `${h.h}%` }}
       aria-hidden="true"
     />
@@ -39,7 +42,14 @@ function Placeholder({ module, step }: Props) {
   );
 }
 
-export default function StepStage({ module, step, focusTitle = false, activeWord = -1 }: Props) {
+// Put the presenter on the side away from the highlighted area so it never hides it.
+function presenterSide(step: Step): "left" | "right" {
+  const h = step.highlight;
+  if (!h) return "left";
+  return h.x + h.w / 2 < 45 ? "right" : "left";
+}
+
+export default function StepStage({ module, step, focusTitle = false, activeWord = -1, presenter }: Props) {
   const [failed, setFailed] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<string | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -49,8 +59,8 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
   const showImage = failed !== step.id;
 
   return (
-    <section aria-labelledby="step-title" className="rounded-2xl bg-white p-4 shadow-sm md:p-6">
-      <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+    <section aria-labelledby="step-title" className="rounded-2xl bg-white p-3 shadow-sm md:p-4">
+      <div className="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span className="rounded-full bg-[#0e7c9b]/10 px-3 py-0.5 text-xs font-medium text-[#0e7c9b]">
           {module.icon} {module.title} · שלב {step.id}
         </span>
@@ -60,7 +70,7 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
       </div>
 
       {/* Width is capped from viewport height so image + ring scale together (keeps % coords exact). */}
-      <div className="relative mx-auto w-full max-w-[max(18rem,calc((100vh-24rem)*1.6))]">
+      <div className="relative mx-auto w-full max-w-[max(18rem,calc((100vh-10rem)*2.05))]">
         {showImage ? (
           <div className="relative overflow-hidden rounded-xl border border-slate-100">
             <img
@@ -78,6 +88,27 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
           <div className="relative">
             <Placeholder module={module} step={step} />
             <HighlightRing step={step} />
+          </div>
+        )}
+        {activeWord >= 0 && (
+          <p
+            data-testid="subtitle"
+            data-variant="dark"
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-[6%] left-1/2 z-10 hidden w-max md:block max-w-[62%] -translate-x-1/2 rounded-xl bg-slate-900/80 px-4 py-2 text-center text-sm leading-relaxed text-white shadow-lg backdrop-blur-sm md:text-lg"
+          >
+            <KaraokeText text={step.script} active={activeWord} range={sentenceRange(step.script, activeWord)} />
+          </p>
+        )}
+        {presenter && (
+          <div
+            data-testid="presenter-slot"
+            style={{ ["--tilt" as string]: presenterSide(step) === "left" ? -1 : 1 }}
+            className={`absolute bottom-0 z-10 w-[clamp(64px,17%,220px)] translate-y-[8%] ${
+              presenterSide(step) === "left" ? "left-1 md:-translate-x-[22%]" : "right-1 md:translate-x-[22%]"
+            }`}
+          >
+            {presenter}
           </div>
         )}
       </div>
