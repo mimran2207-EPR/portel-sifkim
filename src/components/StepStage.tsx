@@ -41,13 +41,6 @@ function Placeholder({ module, step }: Props) {
   );
 }
 
-// Put the presenter on the side away from the highlighted area so it never hides it.
-function presenterSide(step: Step): "left" | "right" {
-  const h = step.highlight;
-  if (!h) return "left";
-  return h.x + h.w / 2 < 45 ? "right" : "left";
-}
-
 export default function StepStage({ module, step, focusTitle = false, activeWord = -1, presenter }: Props) {
   const [failed, setFailed] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<string | null>(null);
@@ -90,12 +83,11 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
           </div>
         )}
         {presenter && (
+          // Always the same corner (bottom-left) so the presenter never jumps between steps.
           <div
             data-testid="presenter-slot"
-            style={{ ["--tilt" as string]: presenterSide(step) === "left" ? -1 : 1 }}
-            className={`absolute bottom-0 z-10 w-[clamp(64px,17%,220px)] translate-y-[8%] ${
-              presenterSide(step) === "left" ? "left-1 md:-translate-x-[22%]" : "right-1 md:translate-x-[22%]"
-            }`}
+            style={{ ["--tilt" as string]: -1 }}
+            className="absolute bottom-0 left-1 z-10 w-[clamp(64px,17%,220px)] translate-y-[8%] md:-translate-x-[22%]"
           >
             {presenter}
           </div>
