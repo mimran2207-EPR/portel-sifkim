@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Step } from "../content/types";
 import { AVATAR_FALLBACK, PRESENTER_IMAGE, avatarVideoUrl } from "../lib/media";
-import { speak, stopSpeaking } from "../lib/speech";
+import { narrate as startNarration } from "../lib/narration";
+import { stopSpeaking } from "../lib/speech";
 
 interface Props {
   step: Step;
@@ -32,9 +33,8 @@ export default function AvatarPanel({ step, introUrl, narrate }: Props) {
 
   useEffect(() => {
     if (phase !== "narration" || !narrate) return;
-    speak(step.script, { onStart: () => setSpeaking(true), onEnd: () => setSpeaking(false) });
-    return () => stopSpeaking();
-  }, [phase, narrate, step.script]);
+    return startNarration(step.id, step.script, { onStart: () => setSpeaking(true), onEnd: () => setSpeaking(false) });
+  }, [phase, narrate, step.id, step.script]);
 
   useEffect(() => () => stopSpeaking(), []);
 

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import AvatarPanel from "../src/components/AvatarPanel";
-import * as speech from "../src/lib/speech";
+import * as narration from "../src/lib/narration";
 
 const step = { id: "1.1", title: "בחירת רשות", script: "נתחיל בכניסה לפורטל" };
 
@@ -8,7 +8,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe("AvatarPanel playback order", () => {
   it("step video → module intro video → narration", () => {
-    const speak = vi.spyOn(speech, "speak").mockImplementation(() => {});
+    const speak = vi.spyOn(narration, "narrate").mockImplementation(() => () => {});
     const { container } = render(<AvatarPanel step={step} introUrl="/avatar/m1.mp4" narrate />);
 
     expect(container.querySelector("video")!.getAttribute("src")).toBe("/avatar/1.1.mp4");
@@ -19,18 +19,18 @@ describe("AvatarPanel playback order", () => {
     fireEvent.ended(container.querySelector("video")!);
 
     expect(container.querySelector("video")).toBeNull();
-    expect(speak).toHaveBeenCalledWith(step.script, expect.any(Object));
+    expect(speak).toHaveBeenCalledWith(step.id, step.script, expect.any(Object));
   });
 
   it("narrates straight away when there is no video and no intro", () => {
-    const speak = vi.spyOn(speech, "speak").mockImplementation(() => {});
+    const speak = vi.spyOn(narration, "narrate").mockImplementation(() => () => {});
     const { container } = render(<AvatarPanel step={step} narrate />);
     fireEvent.error(container.querySelector("video")!);
     expect(speak).toHaveBeenCalledTimes(1);
   });
 
   it("stays silent when narration is off", () => {
-    const speak = vi.spyOn(speech, "speak").mockImplementation(() => {});
+    const speak = vi.spyOn(narration, "narrate").mockImplementation(() => () => {});
     const { container } = render(<AvatarPanel step={step} narrate={false} />);
     fireEvent.error(container.querySelector("video")!);
     expect(speak).not.toHaveBeenCalled();
@@ -38,7 +38,10 @@ describe("AvatarPanel playback order", () => {
   });
 
   it("animates the avatar while speaking", () => {
-    vi.spyOn(speech, "speak").mockImplementation((_t, h) => h?.onStart?.());
+    vi.spyOn(narration, "narrate").mockImplementation((_id, _t, h) => {
+      h?.onStart?.();
+      return () => {};
+    });
     const { container } = render(<AvatarPanel step={step} narrate />);
     fireEvent.error(container.querySelector("video")!);
     expect(screen.getByAltText("העוזר הדיגיטלי של EPR מערכות")).toHaveAttribute("data-speaking", "true");
