@@ -32,6 +32,46 @@ body {
   animation: muni-pulse 1.6s ease-in-out infinite;
 }
 
+/* Karaoke caption: the word being narrated glows yellow. */
+.word-active {
+  border-radius: 0.3em;
+  background-color: #fde047;
+  color: #1f2937;
+  box-shadow:
+    0 0 0 0.12em #fde047,
+    0 0 0.9em 0.25em rgba(253, 224, 71, 0.85);
+  transition:
+    background-color 120ms,
+    box-shadow 120ms;
+}
+
+.word-spoken {
+  color: #0b5f77;
+}
+
+/* Voice-reactive avatar: --lvl (0..1) is set every frame from the narration's audio level. */
+.avatar-voice {
+  transform: scale(calc(1 + var(--lvl, 0) * 0.04));
+  filter: drop-shadow(0 0 calc(var(--lvl, 0) * 22px) rgba(79, 209, 181, 0.95)) brightness(calc(1 + var(--lvl, 0) * 0.08));
+  transition:
+    transform 70ms linear,
+    filter 70ms linear;
+}
+
+@keyframes avatar-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.01);
+  }
+}
+
+.avatar-idle {
+  animation: avatar-breathe 3.6s ease-in-out infinite;
+}
+
 /* Still avatar "talks" while browser narration plays. */
 @keyframes avatar-talk {
   0%,
@@ -54,7 +94,12 @@ body {
     animation: none;
     box-shadow: 0 0 0 4px rgba(14, 124, 155, 0.35);
   }
-  .avatar-speaking {
+  .avatar-speaking,
+  .avatar-idle {
     animation: none;
+  }
+  .avatar-voice {
+    transform: none;
+    transition: none;
   }
 }

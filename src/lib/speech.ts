@@ -43,13 +43,16 @@ function whenVoicesReady(s: SpeechSynthesis, timeoutMs = 1500): Promise<void> {
 
 export interface SpeakHandlers {
   onStart?: () => void;
-  onEnd?: () => void;
+  /** `completed` is true only when the text was spoken to the end. */
+  onEnd?: (completed: boolean) => void;
+  /** Character offset of the word being spoken (when the engine reports it). */
+  onBoundary?: (charIndex: number) => void;
 }
 
 export function speak(text: string, handlers: SpeakHandlers = {}): void {
   const s = synth();
   if (!s || !isSpeechSupported()) {
-    handlers.onEnd?.();
+    handlers.onEnd?.(false);
     return;
   }
   if (s.getVoices().length === 0) {
@@ -71,11 +74,12 @@ function say(s: SpeechSynthesis, text: string, handlers: SpeakHandlers): void {
     if (voice) u.voice = voice;
     u.rate = 0.95;
     u.onstart = () => handlers.onStart?.();
-    u.onend = () => handlers.onEnd?.();
-    u.onerror = () => handlers.onEnd?.();
+    u.onend = () => handlers.onEnd?.(true);
+    u.onerror = () => handlers.onEnd?.(false);
+    u.onboundary = (e: SpeechSynthesisEvent) => handlers.onBoundary?.(e.charIndex);
     s.speak(u);
   } catch {
-    handlers.onEnd?.();
+    handlers.onEnd?.(false);
   }
 }
 

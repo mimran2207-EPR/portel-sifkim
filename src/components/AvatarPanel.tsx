@@ -1,14 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Step } from "../content/types";
 import { AVATAR_FALLBACK, PRESENTER_IMAGE, avatarVideoUrl } from "../lib/media";
 import { narrate as startNarration } from "../lib/narration";
 import { stopSpeaking } from "../lib/speech";
+import KaraokeText from "./KaraokeText";
 
 interface Props {
   step: Step;
   /** Module opening video, played before narration on the module's first step. */
   introUrl?: string;
   narrate: boolean;
+  /** Word currently narrated (karaoke highlight in the bubble). */
+  activeWord?: number;
+  onWord?: (index: number) => void;
+  /** Narration ended; `completed` is false when it was stopped or blocked. */
+  onFinished?: (completed: boolean) => void;
 }
 
 // Playback order: the step's own recorded video → the module intro video (first
@@ -19,10 +25,13 @@ type Phase = "step-video" | "intro-video" | "narration";
 // presenter card (3:4 portrait, name, status) that lives in its own left column.
 // Remount (via `key`) to restart playback for a step. Until a clip has data we
 // show the still avatar, so a missing clip never flashes an empty black player.
-export default function AvatarPanel({ step, introUrl, narrate }: Props) {
+export default function AvatarPanel({ step, introUrl, narrate, activeWord = -1, onWord, onFinished }: Props) {
   const [phase, setPhase] = useState<Phase>("step-video");
   const [videoReady, setVideoReady] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const handlersRef = useRef({ onWord, onFinished });
+  handlersRef.current = { onWord, onFinished };
 
   const videoSrc = phase === "step-video" ? avatarVideoUrl(step.id) : phase === "intro-video" ? introUrl : undefined;
 
@@ -33,7 +42,15 @@ export default function AvatarPanel({ step, introUrl, narrate }: Props) {
 
   useEffect(() => {
     if (phase !== "narration" || !narrate) return;
-    return startNarration(step.id, step.script, { onStart: () => setSpeaking(true), onEnd: () => setSpeaking(false) });
+    return startNarration(step.id, step.script, {
+      onStart: () => setSpeaking(true),
+      onEnd: (completed) => {
+        setSpeaking(false);
+        handlersRef.current.onFinished?.(completed);
+      },
+      onWord: (i) => handlersRef.current.onWord?.(i),
+      onLevel: (v) => imgRef.current?.style.setProperty("--lvl", v.toFixed(3)),
+    });
   }, [phase, narrate, step.id, step.script]);
 
   useEffect(() => () => stopSpeaking(), []);
@@ -71,14 +88,15 @@ export default function AvatarPanel({ step, introUrl, narrate }: Props) {
         />
       )}
       {!videoReady && (
-        <picture className="shrink-0 lg:block">
+        <picture className={`shrink-0 lg:block ${speaking ? "" : "avatar-idle"}`}>
           <source media="(min-width: 1024px)" srcSet={PRESENTER_IMAGE} />
           <img
             src={AVATAR_FALLBACK}
             alt="העוזר הדיגיטלי של EPR מערכות"
+            ref={imgRef}
             data-speaking={speaking ? "true" : "false"}
             className={`h-24 w-24 rounded-full bg-white object-cover shadow-md ring-4 md:h-28 md:w-28 lg:aspect-[3/4] lg:h-auto lg:w-full lg:rounded-xl ${
-              speaking ? "avatar-speaking ring-[#4fd1b5]" : "ring-[#4fd1b5]/30"
+              speaking ? "avatar-voice ring-[#4fd1b5]" : "ring-[#4fd1b5]/30"
             }`}
           />
         </picture>
@@ -106,7 +124,9 @@ export default function AvatarPanel({ step, introUrl, narrate }: Props) {
           <p className="mb-1 text-xs font-bold text-[#0e7c9b]">
             העוזר הדיגיטלי של EPR מערכות {speaking && <span aria-hidden="true">🔊</span>}
           </p>
-          <p>{step.script}</p>
+          <p>
+            <KaraokeText text={step.script} active={activeWord} />
+          </p>
         </div>
       )}
     </aside>

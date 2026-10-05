@@ -23,7 +23,7 @@ describe("App", () => {
     expect(screen.getAllByText("ברוכים הבאים").length).toBeGreaterThan(0);
     const s01 = findStep("0.1")!.step;
     expect(heading()).toHaveTextContent(s01.title);
-    expect(screen.getAllByText(s01.script).length).toBeGreaterThan(0);
+    expect(screen.getByTestId("caption")).toHaveTextContent(s01.script);
   });
 
   it("disables 'הקודם' on the first step", () => {

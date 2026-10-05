@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { allSteps, findStep, modules } from "./content/lessons";
 import { loadProgress, markDone, resetProgress, setLast } from "./lib/progress";
 import Header from "./components/Header";
@@ -8,6 +8,25 @@ import AvatarPanel from "./components/AvatarPanel";
 import Controls from "./components/Controls";
 import { moduleIntroUrl } from "./lib/media";
 import { isNarrationEnabled, setNarrationEnabled, stopSpeaking } from "./lib/speech";
+
+const AUTO_KEY = "muni-training-auto-v1";
+const AUTO_DELAY_MS = 1500;
+
+function loadAuto(): boolean {
+  try {
+    return window.localStorage.getItem(AUTO_KEY) !== "off";
+  } catch {
+    return true;
+  }
+}
+
+function saveAuto(on: boolean): void {
+  try {
+    window.localStorage.setItem(AUTO_KEY, on ? "on" : "off");
+  } catch {
+    /* ignore */
+  }
+}
 
 function initialIndex(): number {
   const last = loadProgress().last;
@@ -23,6 +42,9 @@ export default function App() {
   const [replay, setReplay] = useState(0);
   const [navigated, setNavigated] = useState(false);
   const [narrate, setNarrate] = useState(isNarrationEnabled);
+  const [autoAdvance, setAutoAdvance] = useState(loadAuto);
+  const [activeWord, setActiveWord] = useState(-1);
+  const autoTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const step = allSteps[index];
   const found = findStep(step.id)!;
@@ -42,7 +64,9 @@ export default function App() {
 
   useEffect(() => {
     setLast(step.id);
-  }, [step.id]);
+    setActiveWord(-1);
+    return () => clearTimeout(autoTimer.current);
+  }, [step.id, replay]);
 
   const goNext = useCallback(() => {
     markDone(allSteps[index].id);
@@ -59,6 +83,25 @@ export default function App() {
       setNavigated(true);
     }
   }, [index]);
+
+  // Narration finished on its own: move on automatically (when enabled).
+  const onNarrationFinished = useCallback(
+    (completed: boolean) => {
+      setActiveWord(-1);
+      clearTimeout(autoTimer.current);
+      if (completed && autoAdvance && index < allSteps.length - 1) {
+        autoTimer.current = setTimeout(goNext, AUTO_DELAY_MS);
+      }
+    },
+    [autoAdvance, index, goNext],
+  );
+
+  function toggleAuto() {
+    const next = !autoAdvance;
+    if (!next) clearTimeout(autoTimer.current);
+    saveAuto(next);
+    setAutoAdvance(next);
+  }
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -113,10 +156,18 @@ export default function App() {
           />
         </div>
         <div className="md:col-start-2 md:row-start-1 lg:sticky lg:top-6 lg:col-start-3 lg:self-start">
-          <AvatarPanel key={`${step.id}-${replay}`} step={step} introUrl={introUrl} narrate={narrate} />
+          <AvatarPanel
+            key={`${step.id}-${replay}`}
+            step={step}
+            introUrl={introUrl}
+            narrate={narrate}
+            activeWord={activeWord}
+            onWord={setActiveWord}
+            onFinished={onNarrationFinished}
+          />
         </div>
         <main className="flex min-w-0 flex-col gap-4 md:col-start-2 md:row-start-2 lg:row-start-1">
-          <StepStage key={step.id} module={found.module} step={step} focusTitle={navigated} />
+          <StepStage key={step.id} module={found.module} step={step} focusTitle={navigated} activeWord={activeWord} />
           <div className="sticky bottom-0 z-10 -mx-3 bg-white/95 px-3 py-2 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] backdrop-blur md:mx-0 md:rounded-2xl md:bg-[#f1f6f8]/95 md:shadow-none">
             <Controls
               isFirst={isFirst}
@@ -127,6 +178,8 @@ export default function App() {
               onReplay={() => setReplay((r) => r + 1)}
               narrate={narrate}
               onToggleNarrate={toggleNarrate}
+              autoAdvance={autoAdvance}
+              onToggleAuto={toggleAuto}
             />
           </div>
         </main>

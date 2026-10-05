@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { Module, Step } from "../content/types";
 import { screenUrl } from "../lib/media";
+import KaraokeText from "./KaraokeText";
 
 interface Props {
   module: Module;
   step: Step;
   focusTitle?: boolean;
+  /** Word being narrated; highlighted in the caption. */
+  activeWord?: number;
 }
 
 function HighlightRing({ step }: { step: Step }) {
@@ -36,7 +39,7 @@ function Placeholder({ module, step }: Props) {
   );
 }
 
-export default function StepStage({ module, step, focusTitle = false }: Props) {
+export default function StepStage({ module, step, focusTitle = false, activeWord = -1 }: Props) {
   const [failed, setFailed] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<string | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -99,7 +102,7 @@ export default function StepStage({ module, step, focusTitle = false }: Props) {
       )}
 
       <p data-testid="caption" className="mt-4 rounded-xl bg-slate-50 p-3 leading-relaxed text-slate-700 md:text-lg">
-        {step.script}
+        <KaraokeText text={step.script} active={activeWord} />
       </p>
     </section>
   );

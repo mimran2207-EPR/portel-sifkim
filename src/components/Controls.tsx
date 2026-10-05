@@ -7,12 +7,14 @@ interface Props {
   onReplay: () => void;
   narrate: boolean;
   onToggleNarrate: () => void;
+  autoAdvance: boolean;
+  onToggleAuto: () => void;
 }
 
 const base =
   "rounded-2xl px-5 py-2.5 font-medium shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0e7c9b] disabled:cursor-not-allowed disabled:opacity-40";
 
-export default function Controls({ isFirst, isLast, finished, onPrev, onNext, onReplay, narrate, onToggleNarrate }: Props) {
+export default function Controls({ isFirst, isLast, finished, onPrev, onNext, onReplay, narrate, onToggleNarrate, autoAdvance, onToggleAuto }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
@@ -30,6 +32,15 @@ export default function Controls({ isFirst, isLast, finished, onPrev, onNext, on
         >
           <span aria-hidden="true">{narrate ? "🔊 " : "🔇 "}</span>
           {narrate ? "קריינות פעילה" : "קריינות כבויה"}
+        </button>
+        <button
+          type="button"
+          aria-pressed={autoAdvance}
+          className={`${base} bg-white text-slate-600 hover:bg-slate-50`}
+          onClick={onToggleAuto}
+        >
+          <span aria-hidden="true">{autoAdvance ? "⏭ " : "⏸ "}</span>
+          {autoAdvance ? "מעבר אוטומטי" : "מעבר ידני"}
         </button>
         <button type="button" className={`${base} muni-gradient text-white hover:brightness-105`} onClick={onNext}>
           {isLast ? (
