@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.wrangler/
+.env*
+# Private source material - never commit (public repo)
+WhatsApp Image*
+צילום מסך*
+private/
