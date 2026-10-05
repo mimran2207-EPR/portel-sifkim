@@ -73,3 +73,48 @@ describe("narration preference", () => {
     expect(isNarrationEnabled()).toBe(false);
   });
 });
+
+describe("voice loading", () => {
+  it("waits for the voice list before speaking, then uses the Hebrew voice", async () => {
+    let voices: { lang: string; name: string }[] = [];
+    const listeners: (() => void)[] = [];
+    const spoken: { voice: unknown }[] = [];
+    vi.stubGlobal("SpeechSynthesisUtterance", class { lang = ""; rate = 1; voice: unknown = null; onstart = null; onend = null; onerror = null; constructor(public text: string) {} });
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: {
+        speak: (u: { voice: unknown }) => spoken.push(u),
+        cancel: () => {},
+        getVoices: () => voices,
+        addEventListener: (_: string, fn: () => void) => listeners.push(fn),
+        removeEventListener: () => {},
+      },
+    });
+    speak("שלום");
+    expect(spoken).toHaveLength(0);
+    voices = [{ lang: "he-IL", name: "Asaf" }];
+    listeners.forEach((fn) => fn());
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(spoken).toHaveLength(1);
+    expect((spoken[0].voice as { name: string }).name).toBe("Asaf");
+  });
+
+  it("drops a pending speak when stopped before voices load", async () => {
+    const listeners: (() => void)[] = [];
+    const spoken: unknown[] = [];
+    let voices: { lang: string; name: string }[] = [];
+    vi.stubGlobal("SpeechSynthesisUtterance", class { constructor(public text: string) {} });
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: { speak: (u: unknown) => spoken.push(u), cancel: () => {}, getVoices: () => voices, addEventListener: (_: string, fn: () => void) => listeners.push(fn), removeEventListener: () => {} },
+    });
+    speak("שלום");
+    stopSpeaking();
+    voices = [{ lang: "he-IL", name: "Asaf" }];
+    listeners.forEach((fn) => fn());
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(spoken).toHaveLength(0);
+  });
+});

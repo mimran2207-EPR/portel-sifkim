@@ -16,8 +16,29 @@ export function isSpeechSupported(): boolean {
   return synth() !== undefined && typeof SpeechSynthesisUtterance !== "undefined";
 }
 
+// The same Hebrew voice is pinned for the whole session so every step sounds alike.
+let pinnedVoice: SpeechSynthesisVoice | undefined;
+// Bumped by stopSpeaking so a speak() still waiting for voices is dropped.
+let generation = 0;
+
 function hebrewVoice(s: SpeechSynthesis): SpeechSynthesisVoice | undefined {
-  return s.getVoices().find((v) => v.lang.toLowerCase().startsWith("he") || v.lang.toLowerCase().startsWith("iw"));
+  if (pinnedVoice) return pinnedVoice;
+  pinnedVoice = s.getVoices().find((v) => v.lang.toLowerCase().startsWith("he") || v.lang.toLowerCase().startsWith("iw"));
+  return pinnedVoice;
+}
+
+// Browsers load the voice list asynchronously; speaking before it arrives falls
+// back to a different default voice. Wait for it (bounded) before speaking.
+function whenVoicesReady(s: SpeechSynthesis, timeoutMs = 1500): Promise<void> {
+  if (s.getVoices().length > 0) return Promise.resolve();
+  return new Promise((resolve) => {
+    const done = () => {
+      s.removeEventListener?.("voiceschanged", done);
+      resolve();
+    };
+    s.addEventListener?.("voiceschanged", done);
+    setTimeout(done, timeoutMs);
+  });
 }
 
 export interface SpeakHandlers {
@@ -31,6 +52,17 @@ export function speak(text: string, handlers: SpeakHandlers = {}): void {
     handlers.onEnd?.();
     return;
   }
+  if (s.getVoices().length === 0) {
+    const gen = generation;
+    void whenVoicesReady(s).then(() => {
+      if (gen === generation) say(s, text, handlers);
+    });
+    return;
+  }
+  say(s, text, handlers);
+}
+
+function say(s: SpeechSynthesis, text: string, handlers: SpeakHandlers): void {
   try {
     s.cancel();
     const u = new SpeechSynthesisUtterance(text);
@@ -48,6 +80,7 @@ export function speak(text: string, handlers: SpeakHandlers = {}): void {
 }
 
 export function stopSpeaking(): void {
+  generation++;
   try {
     synth()?.cancel();
   } catch {
