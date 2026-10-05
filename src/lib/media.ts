@@ -3,7 +3,7 @@ export const AVATAR_FALLBACK = "/avatar/avatar.jpg"; // round face crop (mobile/
 export const PRESENTER_IMAGE = "/avatar/presenter.jpg"; // 3:4 half-body (desktop presenter column)
 
 export function screenUrl(id: string): string {
-  return `/screens/${id}.png`;
+  return `/screens/${id}.jpg`;
 }
 
 export function moduleIntroUrl(moduleId: string): string {

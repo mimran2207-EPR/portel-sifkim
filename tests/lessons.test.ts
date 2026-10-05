@@ -36,12 +36,17 @@ test("warnings exactly on 1.4, 4.1, 5.1-5.4; 5.1 is the exact portal message", (
   expect(findStep("5.1")?.step.warning).toBe("ח.פ על החשבונית אינו תואם למספר העוסק שלך. לא ניתן להגיש חשבונית זו.");
 });
 
-it.each(allSteps)("step $id: Hebrew script of 20-90 words, no highlight yet", (s) => {
+it.each(allSteps)("step $id: Hebrew script of 20-90 words, highlight inside the screen", (s) => {
   const words = s.script.trim().split(/\s+/).length;
   expect(words).toBeGreaterThanOrEqual(20);
   expect(words).toBeLessThanOrEqual(90);
   expect(s.script).toMatch(/[֐-׿]/);
-  expect(s.highlight).toBeUndefined();
+  if (s.highlight) {
+    const { x, y, w, h } = s.highlight;
+    expect(Math.min(x, y, w, h)).toBeGreaterThanOrEqual(0);
+    expect(x + w).toBeLessThanOrEqual(100);
+    expect(y + h).toBeLessThanOrEqual(100);
+  }
 });
 
 test("no warning starts with the duplicated 'שימו לב' prefix", () => {

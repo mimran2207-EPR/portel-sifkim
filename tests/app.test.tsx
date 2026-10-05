@@ -12,7 +12,7 @@ beforeEach(() => {
 
 describe("media", () => {
   it("builds screen and avatar urls", () => {
-    expect(screenUrl("4.5")).toBe("/screens/4.5.png");
+    expect(screenUrl("4.5")).toBe("/screens/4.5.jpg");
     expect(avatarVideoUrl("4.5")).toBe("/avatar/4.5.mp4");
   });
 });
