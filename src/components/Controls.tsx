@@ -22,7 +22,9 @@ export default function Controls({ isFirst, isLast, finished, onPrev, onNext, on
         </button>
         <button type="button" className={`${base} muni-gradient text-white hover:brightness-105`} onClick={onNext}>
           {isLast ? (
-            "סיום ההדרכה 🎉"
+            <>
+              סיום ההדרכה <span aria-hidden="true">🎉</span>
+            </>
           ) : (
             <>
               הבא<span aria-hidden="true"> ←</span>

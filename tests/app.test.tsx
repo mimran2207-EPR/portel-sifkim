@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, within } from "@testing-library/react";
 import App from "../src/App";
 import { allSteps, findStep } from "../src/content/lessons";
-import { loadProgress, resetProgress, setLast } from "../src/lib/progress";
+import { loadProgress, markDone, resetProgress, setLast } from "../src/lib/progress";
 import { screenUrl, avatarVideoUrl } from "../src/lib/media";
 
 const heading = () => screen.getByRole("heading", { level: 2 });
@@ -125,11 +125,55 @@ describe("App", () => {
     expect(screen.getByText(tipped.tip!)).toBeInTheDocument();
   });
 
-  it("resets progress from the nav footer", () => {
+  it("resets progress from the nav footer after confirmation", () => {
+    const spy = vi.spyOn(window, "confirm").mockReturnValue(true);
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "הבא" }));
     fireEvent.click(screen.getByRole("button", { name: "איפוס התקדמות" }));
+    expect(spy).toHaveBeenCalledWith("לאפס את ההתקדמות?");
     expect(loadProgress().done).toEqual([]);
     expect(heading()).toHaveTextContent(findStep("0.1")!.step.title);
+    spy.mockRestore();
+  });
+
+  it("does not reset when the confirmation is declined", () => {
+    const spy = vi.spyOn(window, "confirm").mockReturnValue(false);
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "הבא" }));
+    fireEvent.click(screen.getByRole("button", { name: "איפוס התקדמות" }));
+    expect(loadProgress().done).toContain("0.1");
+    expect(heading()).toHaveTextContent(findStep("1.1")!.step.title);
+    spy.mockRestore();
+  });
+
+  it("announces step changes via a live region and focuses the title (not on first mount)", () => {
+    render(<App />);
+    expect(heading()).not.toHaveFocus();
+    const live = document.querySelector("[aria-live='polite']")!;
+    expect(live).toHaveTextContent(`שלב 1 מתוך ${allSteps.length}: ${findStep("0.1")!.step.title}`);
+    fireEvent.click(screen.getByRole("button", { name: "הבא" }));
+    expect(live).toHaveTextContent(`שלב 2 מתוך ${allSteps.length}: ${findStep("1.1")!.step.title}`);
+    expect(heading()).toHaveFocus();
+  });
+
+  it("ignores stale ids when counting progress", () => {
+    markDone("9.9");
+    markDone("0.1");
+    render(<App />);
+    expect(screen.getByText(`1/${allSteps.length}`)).toBeInTheDocument();
+  });
+
+  it("keeps the screenshot hidden until it loads", () => {
+    const { container } = render(<App />);
+    const img = container.querySelector("img[data-role='screen']")!;
+    expect(img).toHaveClass("invisible");
+    fireEvent.load(img);
+    expect(img).not.toHaveClass("invisible");
+  });
+
+  it("hides the celebration emoji from assistive tech", () => {
+    setLast(allSteps[allSteps.length - 1].id);
+    render(<App />);
+    expect(screen.getByRole("button", { name: "סיום ההדרכה" })).toBeInTheDocument();
   });
 });

@@ -43,3 +43,7 @@ it.each(allSteps)("step $id: Hebrew script of 20-90 words, no highlight yet", (s
   expect(s.script).toMatch(/[֐-׿]/);
   expect(s.highlight).toBeUndefined();
 });
+
+test("no warning starts with the duplicated 'שימו לב' prefix", () => {
+  for (const s of allSteps) if (s.warning) expect(s.warning.startsWith("שימו לב")).toBe(false);
+});

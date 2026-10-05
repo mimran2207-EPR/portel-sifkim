@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Module, Step } from "../content/types";
 import { screenUrl } from "../lib/media";
 
 interface Props {
   module: Module;
   step: Step;
+  focusTitle?: boolean;
 }
 
 function HighlightRing({ step }: { step: Step }) {
@@ -35,8 +36,13 @@ function Placeholder({ module, step }: Props) {
   );
 }
 
-export default function StepStage({ module, step }: Props) {
+export default function StepStage({ module, step, focusTitle = false }: Props) {
   const [failed, setFailed] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState<string | null>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (focusTitle) titleRef.current?.focus();
+  }, [focusTitle]);
   const showImage = failed !== step.id;
 
   return (
@@ -45,7 +51,7 @@ export default function StepStage({ module, step }: Props) {
         <span className="rounded-full bg-[#0e7c9b]/10 px-3 py-0.5 text-xs font-medium text-[#0e7c9b]">
           {module.icon} {module.title} · שלב {step.id}
         </span>
-        <h2 id="step-title" className="text-xl font-bold text-slate-800 md:text-2xl">
+        <h2 id="step-title" ref={titleRef} tabIndex={-1} className="text-xl focus:outline-none font-bold text-slate-800 md:text-2xl">
           {step.title}
         </h2>
       </div>
@@ -59,7 +65,8 @@ export default function StepStage({ module, step }: Props) {
               data-role="screen"
               src={screenUrl(step.id)}
               alt={`צילום מסך: ${step.title}`}
-              className="block w-full"
+              className={`block w-full ${loaded === step.id ? "" : "invisible"}`}
+              onLoad={() => setLoaded(step.id)}
               onError={() => setFailed(step.id)}
             />
             <HighlightRing step={step} />
@@ -73,7 +80,7 @@ export default function StepStage({ module, step }: Props) {
       </div>
 
       {step.warning && (
-        <div role="note"className="mt-4 flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        <div role="note" className="mt-4 flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
           <span aria-hidden="true">⚠️</span>
           <p>
             <strong>שימו לב: </strong>

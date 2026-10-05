@@ -19,11 +19,14 @@ export default function App() {
   const [done, setDone] = useState<string[]>(() => loadProgress().done);
   const [navOpen, setNavOpen] = useState(false);
   const [replay, setReplay] = useState(0);
+  const [navigated, setNavigated] = useState(false);
 
   const step = allSteps[index];
   const found = findStep(step.id)!;
   const isFirst = index === 0;
   const isLast = index === allSteps.length - 1;
+  const validIds = new Set(allSteps.map((s) => s.id));
+  const doneCount = done.filter((id) => validIds.has(id)).length;
 
   useEffect(() => {
     setLast(step.id);
@@ -32,11 +35,17 @@ export default function App() {
   const goNext = useCallback(() => {
     markDone(allSteps[index].id);
     setDone(loadProgress().done);
-    if (index < allSteps.length - 1) setIndex(index + 1);
+    if (index < allSteps.length - 1) {
+      setIndex(index + 1);
+      setNavigated(true);
+    }
   }, [index]);
 
   const goPrev = useCallback(() => {
-    if (index > 0) setIndex(index - 1);
+    if (index > 0) {
+      setIndex(index - 1);
+      setNavigated(true);
+    }
   }, [index]);
 
   useEffect(() => {
@@ -54,11 +63,15 @@ export default function App() {
 
   function select(id: string) {
     const f = findStep(id);
-    if (f) setIndex(f.index);
+    if (f) {
+      setIndex(f.index);
+      setNavigated(true);
+    }
     setNavOpen(false);
   }
 
   function reset() {
+    if (!window.confirm("לאפס את ההתקדמות?")) return;
     resetProgress();
     setDone([]);
     setIndex(0);
@@ -67,7 +80,10 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header done={done.length} total={allSteps.length} navOpen={navOpen} onToggleNav={() => setNavOpen((o) => !o)} />
+      <div aria-live="polite" className="sr-only">
+        {`שלב ${index + 1} מתוך ${allSteps.length}: ${step.title}`}
+      </div>
+      <Header done={doneCount} total={allSteps.length} navOpen={navOpen} onToggleNav={() => setNavOpen((o) => !o)} />
       <div className="mx-auto flex w-full max-w-7xl flex-1 gap-4 p-3 md:gap-6 md:p-6">
         <ModuleNav
           modules={modules}
@@ -83,7 +99,7 @@ export default function App() {
             Below lg the dock is `display: contents`, so its children take part in main's ordering. */}
         <main className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="order-2 md:order-1 lg:order-none">
-            <StepStage key={step.id} module={found.module} step={step} />
+            <StepStage key={step.id} module={found.module} step={step} focusTitle={navigated} />
           </div>
           <div className="contents lg:sticky lg:bottom-0 lg:z-10 lg:-mx-2 lg:flex lg:items-end lg:justify-between lg:gap-4 lg:rounded-2xl lg:bg-[#f1f6f8]/95 lg:p-2 lg:backdrop-blur">
             <div className="order-3 max-md:sticky max-md:bottom-0 max-md:-mx-3 max-md:bg-white/95 max-md:px-3 max-md:py-2 max-md:shadow-[0_-4px_12px_rgba(0,0,0,0.06)] max-md:backdrop-blur lg:order-none lg:shrink-0">
