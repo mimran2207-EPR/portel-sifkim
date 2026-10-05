@@ -2,7 +2,7 @@ import type { Module, Step } from "./types";
 
 export type { Highlight, Module, Step } from "./types";
 
-// Scripts are spoken aloud by Yehuda's avatar (HeyGen): first person, plural address,
+// Scripts are spoken aloud by the EPR digital assistant avatar (HeyGen): first person, plural address,
 // quoted on-screen labels. `highlight` is filled in Phase 2 from real screenshots.
 // Warnings: only 5.1's warning is verbatim portal text; the others are guidance
 // (rules phrased in our words), pending exact message capture in Phase 2.
@@ -16,7 +16,7 @@ export const modules: Module[] = [
         id: "0.1",
         title: "היכרות",
         script:
-          'שלום, אני יהודה, מנהל הדיגיטל של EPR. ברוכים הבאים למרכז ההדרכה של פורטל הספקים. בפורטל תוכלו לצפות בהזמנות שהרשות הוציאה לכם, להגיש חשבוניות ישירות מהמחשב, לעקוב אחרי מצב כל חשבונית ולראות את התנועות והתשלומים בחשבון שלכם מול הרשות. אני אלווה אתכם שלב אחר שלב, ובכל רגע תוכלו לשמוע הסבר שוב או לעבור לשלב הבא.',
+          'שלום, אני העוזר הדיגיטלי מבית EPR מערכות, ואני אלווה אתכם בכל תהליך ההדרכה על מערכת פורטל הספקים. בפורטל תוכלו לצפות בהזמנות שהרשות הוציאה לכם, להגיש חשבוניות ישירות מהמחשב, לעקוב אחרי מצב כל חשבונית ולראות את התנועות והתשלומים בחשבון שלכם מול הרשות. בכל רגע תוכלו לשמוע הסבר שוב או לעבור לשלב הבא.',
       },
     ],
   },

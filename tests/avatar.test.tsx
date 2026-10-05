@@ -41,6 +41,6 @@ describe("AvatarPanel playback order", () => {
     vi.spyOn(speech, "speak").mockImplementation((_t, h) => h?.onStart?.());
     const { container } = render(<AvatarPanel step={step} narrate />);
     fireEvent.error(container.querySelector("video")!);
-    expect(screen.getByAltText("יהודה, מנהל הדיגיטל")).toHaveAttribute("data-speaking", "true");
+    expect(screen.getByAltText("העוזר הדיגיטלי של EPR מערכות")).toHaveAttribute("data-speaking", "true");
   });
 });

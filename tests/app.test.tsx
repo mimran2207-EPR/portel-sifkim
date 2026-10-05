@@ -101,7 +101,7 @@ describe("App", () => {
     const video = container.querySelector("video")!;
     fireEvent.error(video);
     expect(container.querySelector("video")).toBeNull();
-    expect(screen.getByAltText("יהודה, מנהל הדיגיטל")).toBeInTheDocument();
+    expect(screen.getByAltText("העוזר הדיגיטלי של EPR מערכות")).toBeInTheDocument();
     expect(screen.getByTestId("speech-bubble")).toHaveTextContent(findStep("0.1")!.step.script);
   });
 
