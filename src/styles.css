@@ -1,5 +1,40 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: "Heebo", ui-sans-serif, system-ui, sans-serif;
+  --color-muni-dark: #0e7c9b;
+  --color-muni-light: #4fd1b5;
+}
+
 body {
   font-family: "Heebo", sans-serif;
+  background: #f1f6f8;
+  color: #1e293b;
+}
+
+.muni-gradient {
+  background-image: linear-gradient(90deg, #0e7c9b, #4fd1b5);
+}
+
+@keyframes muni-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(14, 124, 155, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(14, 124, 155, 0);
+  }
+}
+
+.highlight-ring {
+  border: 3px solid #0e7c9b;
+  border-radius: 0.75rem;
+  animation: muni-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .highlight-ring {
+    animation: none;
+    box-shadow: 0 0 0 4px rgba(14, 124, 155, 0.35);
+  }
 }
