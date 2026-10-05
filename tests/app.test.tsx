@@ -57,6 +57,25 @@ describe("App", () => {
     expect(heading()).toHaveTextContent(findStep("0.1")!.step.title);
   });
 
+  it("ignores arrow keys while the drawer is open or in editable content", () => {
+    render(<App />);
+    const first = findStep("0.1")!.step.title;
+    fireEvent.click(screen.getByRole("button", { name: "פתיחת תפריט" }));
+    fireEvent.keyDown(window, { key: "ArrowLeft" });
+    expect(heading()).toHaveTextContent(first);
+    fireEvent.keyDown(window, { key: "Escape" });
+    const editable = document.createElement("div");
+    editable.contentEditable = "true";
+    // jsdom does not implement isContentEditable
+    Object.defineProperty(editable, "isContentEditable", { value: true });
+    document.body.appendChild(editable);
+    fireEvent.keyDown(editable, { key: "ArrowLeft" });
+    expect(heading()).toHaveTextContent(first);
+    editable.remove();
+    fireEvent.keyDown(window, { key: "ArrowLeft" });
+    expect(heading()).toHaveTextContent(findStep("1.1")!.step.title);
+  });
+
   it("restores the last step on load", () => {
     setLast("4.5");
     render(<App />);
@@ -99,7 +118,7 @@ describe("App", () => {
     const tipped = allSteps.find((s) => s.tip)!;
     setLast(warned.id);
     const { unmount } = render(<App />);
-    expect(screen.getByRole("alert")).toHaveTextContent(warned.warning!);
+    expect(screen.getByRole("note")).toHaveTextContent(warned.warning!);
     unmount();
     setLast(tipped.id);
     render(<App />);

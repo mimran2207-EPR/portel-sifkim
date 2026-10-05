@@ -24,7 +24,7 @@ export default function Header({ done, total, navOpen, onToggleNav }: Props) {
           <h1 className="truncate text-lg font-bold md:text-2xl">מרכז ההדרכה לספקים</h1>
           <p className="hidden text-sm text-white/85 sm:block">פורטל הספקים Muni · הדרכה צעד אחר צעד</p>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-1" aria-label="התקדמות">
+        <div className="flex shrink-0 flex-col items-end gap-1" role="group" aria-label="התקדמות">
           <span className="text-sm font-medium" dir="ltr">
             {done}/{total}
           </span>

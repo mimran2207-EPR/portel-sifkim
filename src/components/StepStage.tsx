@@ -24,7 +24,7 @@ function Placeholder({ module, step }: Props) {
   return (
     <div
       data-testid="screen-placeholder"
-      className="flex aspect-[16/10] max-h-[32vh] min-h-44 w-full flex-col items-center justify-center gap-3 rounded-xl bg-gradient-to-br from-[#0e7c9b]/10 to-[#4fd1b5]/15 p-6 text-center"
+      className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-3 rounded-xl bg-gradient-to-br from-[#0e7c9b]/10 to-[#4fd1b5]/15 p-6 text-center"
     >
       <span className="text-5xl" aria-hidden="true">
         {module.icon}
@@ -50,7 +50,8 @@ export default function StepStage({ module, step }: Props) {
         </h2>
       </div>
 
-      <div className="relative">
+      {/* Width is capped from viewport height so image + ring scale together (keeps % coords exact). */}
+      <div className="relative mx-auto w-full max-w-[max(18rem,calc((100vh-24rem)*1.6))]">
         {showImage ? (
           <div className="relative overflow-hidden rounded-xl border border-slate-100">
             <img
@@ -72,7 +73,7 @@ export default function StepStage({ module, step }: Props) {
       </div>
 
       {step.warning && (
-        <div role="alert" className="mt-4 flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        <div role="note"className="mt-4 flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
           <span aria-hidden="true">⚠️</span>
           <p>
             <strong>שימו לב: </strong>

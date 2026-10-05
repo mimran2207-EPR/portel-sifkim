@@ -15,7 +15,7 @@ export default function AvatarPanel({ step }: Props) {
   const [video, setVideo] = useState<VideoState>("loading");
 
   return (
-    <aside aria-label="יהודה, המדריך" className="flex items-start gap-3 rounded-2xl bg-white p-3 shadow-sm">
+    <aside aria-label="יהודה, המדריך" className="flex w-full items-end gap-3 lg:w-fit">
       {video !== "failed" && (
         <video
           src={avatarVideoUrl(step.id)}
@@ -23,7 +23,11 @@ export default function AvatarPanel({ step }: Props) {
           controls
           playsInline
           aria-label={`סרטון הסבר: ${step.title}`}
-          className={video === "ready" ? "aspect-square w-40 rounded-2xl bg-slate-100 object-cover md:w-48" : "hidden"}
+          className={
+            video === "ready"
+              ? "aspect-square w-36 shrink-0 rounded-full bg-slate-100 object-cover shadow-md ring-4 ring-[#4fd1b5]/30 md:w-44"
+              : "hidden"
+          }
           onLoadedData={() => setVideo("ready")}
           onError={() => setVideo("failed")}
         />
@@ -33,11 +37,11 @@ export default function AvatarPanel({ step }: Props) {
           <img
             src={AVATAR_FALLBACK}
             alt="יהודה, מנהל הדיגיטל"
-            className="h-16 w-16 shrink-0 rounded-full shadow-md ring-4 ring-[#4fd1b5]/30 md:h-20 md:w-20"
+            className="h-20 w-20 shrink-0 rounded-full bg-white shadow-md ring-4 ring-[#4fd1b5]/30 md:h-24 md:w-24"
           />
           <div
             data-testid="speech-bubble"
-            className="relative max-h-28 flex-1 overflow-y-auto rounded-2xl rounded-ss-none bg-[#0e7c9b]/8 p-3 text-sm leading-relaxed text-slate-700 md:max-h-40"
+            className="relative mb-2 max-h-28 min-w-0 flex-1 overflow-y-auto rounded-2xl rounded-es-none bg-white p-3 text-sm leading-relaxed text-slate-700 shadow-sm lg:w-80 lg:flex-none"
           >
             <p className="mb-1 text-xs font-bold text-[#0e7c9b]">יהודה, מנהל הדיגיטל של EPR</p>
             <p>{step.script}</p>

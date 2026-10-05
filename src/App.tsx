@@ -42,15 +42,15 @@ export default function App() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") return setNavOpen(false);
-      if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-      const tag = (e.target as HTMLElement | null)?.tagName;
-      if (tag && SKIP_KEYS_IN.has(tag)) return;
+      if (navOpen || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.isContentEditable || (target?.tagName && SKIP_KEYS_IN.has(target.tagName))) return;
       if (e.key === "ArrowLeft") goNext();
       else if (e.key === "ArrowRight") goPrev();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [goNext, goPrev]);
+  }, [goNext, goPrev, navOpen]);
 
   function select(id: string) {
     const f = findStep(id);
@@ -78,24 +78,27 @@ export default function App() {
           onReset={reset}
           onClose={() => setNavOpen(false)}
         />
-        {/* Mobile: avatar → stage → controls. Tablet: stage → avatar → controls.
-            Desktop (lg): stage on top; controls (right) + avatar (left) below. */}
-        <main className="flex min-w-0 flex-1 flex-col gap-4 lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:content-start lg:items-end">
-          <div className="order-2 md:order-1 lg:order-none lg:col-span-2">
+        {/* Mobile: avatar → stage → sticky controls. Tablet: stage → avatar → controls.
+            Desktop (lg): stage, then a sticky dock with controls (right) + round avatar (left).
+            Below lg the dock is `display: contents`, so its children take part in main's ordering. */}
+        <main className="flex min-w-0 flex-1 flex-col gap-4">
+          <div className="order-2 md:order-1 lg:order-none">
             <StepStage key={step.id} module={found.module} step={step} />
           </div>
-          <div className="order-3 max-md:sticky max-md:bottom-0 max-md:-mx-3 max-md:bg-white/95 max-md:px-3 max-md:py-2 max-md:shadow-[0_-4px_12px_rgba(0,0,0,0.06)] max-md:backdrop-blur lg:order-none">
-            <Controls
-              isFirst={isFirst}
-              isLast={isLast}
-              finished={done.includes(step.id)}
-              onPrev={goPrev}
-              onNext={goNext}
-              onReplay={() => setReplay((r) => r + 1)}
-            />
-          </div>
-          <div className="order-1 md:order-2 lg:order-none">
-            <AvatarPanel key={`${step.id}-${replay}`} step={step} />
+          <div className="contents lg:sticky lg:bottom-0 lg:z-10 lg:-mx-2 lg:flex lg:items-end lg:justify-between lg:gap-4 lg:rounded-2xl lg:bg-[#f1f6f8]/95 lg:p-2 lg:backdrop-blur">
+            <div className="order-3 max-md:sticky max-md:bottom-0 max-md:-mx-3 max-md:bg-white/95 max-md:px-3 max-md:py-2 max-md:shadow-[0_-4px_12px_rgba(0,0,0,0.06)] max-md:backdrop-blur lg:order-none lg:shrink-0">
+              <Controls
+                isFirst={isFirst}
+                isLast={isLast}
+                finished={done.includes(step.id)}
+                onPrev={goPrev}
+                onNext={goNext}
+                onReplay={() => setReplay((r) => r + 1)}
+              />
+            </div>
+            <div className="order-1 md:order-2 lg:order-none lg:min-w-0 lg:max-w-md">
+              <AvatarPanel key={`${step.id}-${replay}`} step={step} />
+            </div>
           </div>
         </main>
       </div>
