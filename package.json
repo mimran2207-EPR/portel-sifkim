@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "test": "vitest run",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy": "wrangler deploy",
     "heygen": "tsx scripts/build-heygen-scripts.ts"
   },
   "dependencies": {
