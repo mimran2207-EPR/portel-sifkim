@@ -56,7 +56,7 @@ export default function AvatarPanel({ step, introUrl, narrate }: Props) {
           aria-label={phase === "intro-video" ? "סרטון פתיחה של הנושא" : `סרטון הסבר: ${step.title}`}
           className={
             videoReady
-              ? "aspect-square w-36 shrink-0 rounded-full bg-slate-100 object-cover shadow-md ring-4 ring-[#4fd1b5]/30 md:w-44 lg:aspect-[3/4] lg:w-full lg:rounded-xl lg:ring-0"
+              ? "aspect-square w-36 shrink-0 rounded-full bg-slate-100 object-cover object-[50%_18%] shadow-md ring-4 ring-[#4fd1b5]/30 md:w-44 lg:aspect-[3/4] lg:w-full lg:rounded-xl lg:ring-0"
               : "hidden"
           }
           onLoadedData={() => setVideoReady(true)}
