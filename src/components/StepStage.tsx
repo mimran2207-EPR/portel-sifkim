@@ -47,7 +47,7 @@ function Placeholder({ module, step }: Props) {
 }
 
 const arrow =
-  "absolute top-[42%] z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-2xl text-[#0e7c9b] shadow-lg ring-1 ring-slate-200 backdrop-blur transition hover:scale-110 hover:bg-white focus-visible:outline-2 focus-visible:outline-[#0e7c9b] disabled:pointer-events-none disabled:opacity-0 md:h-14 md:w-14";
+  "absolute top-[16%] z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-2xl text-[#0e7c9b] shadow-lg ring-1 ring-slate-200 backdrop-blur transition hover:scale-110 hover:bg-white focus-visible:outline-2 focus-visible:outline-[#0e7c9b] disabled:pointer-events-none disabled:opacity-0 md:h-14 md:w-14";
 
 export default function StepStage({ module, step, focusTitle = false, activeWord = -1, presenter, onPrev, onNext, canPrev = true, canNext = true }: Props) {
   const [failed, setFailed] = useState<string | null>(null);
