@@ -33,7 +33,7 @@ export default function ProcessStepper({ modules, currentId, done, onSelect }: P
         {modules.map((m, i) => {
           const st = moduleState(m, currentId, doneSet);
           return (
-            <li key={m.id} className="flex min-w-[4.5rem] flex-1 items-start">
+            <li key={m.id} className="flex min-w-[2.6rem] flex-1 items-start md:min-w-[4.5rem]">
               <button
                 type="button"
                 onClick={() => onSelect(m.steps[0].id)}
@@ -42,18 +42,18 @@ export default function ProcessStepper({ modules, currentId, done, onSelect }: P
                 className="group flex w-full flex-col items-center gap-1 focus:outline-none"
               >
                 <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-bold transition group-hover:scale-110 group-focus-visible:ring-4 group-focus-visible:ring-[#0e7c9b]/40 md:h-11 md:w-11 md:text-base ${circle[st]}`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-bold transition group-hover:scale-110 group-focus-visible:ring-4 group-focus-visible:ring-[#0e7c9b]/40 md:h-11 md:w-11 md:text-base ${circle[st]}`}
                 >
                   {st === "done" ? "✓" : i + 1}
                 </span>
-                <span className={`text-center text-[0.68rem] leading-tight md:text-xs ${st === "current" ? "font-bold text-[#0e7c9b]" : "text-slate-500"}`}>
+                <span className={`text-center text-[0.68rem] leading-tight md:text-xs ${st === "current" ? "font-bold text-[#0e7c9b] max-md:whitespace-nowrap" : "text-slate-500 max-md:hidden"}`}>
                   {m.title}
                 </span>
               </button>
               {i < modules.length - 1 && (
                 <span
                   aria-hidden="true"
-                  className={`mt-[1.1rem] h-0.5 min-w-3 flex-1 md:mt-[1.35rem] ${st === "done" ? "bg-[#4fd1b5]" : "bg-slate-200"}`}
+                  className={`mt-[1rem] h-0.5 min-w-2 flex-1 md:mt-[1.35rem] ${st === "done" ? "bg-[#4fd1b5]" : "bg-slate-200"}`}
                 />
               )}
             </li>
