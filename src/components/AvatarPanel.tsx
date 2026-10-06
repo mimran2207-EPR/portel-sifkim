@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Step } from "../content/types";
 import { TALK_FRAMES, avatarVideoUrl } from "../lib/media";
-import { narrate as startNarration } from "../lib/narration";
+import { narrate as startNarration, type NarrationControl } from "../lib/narration";
 import { stopSpeaking } from "../lib/speech";
 import { wordAtProgress } from "../lib/words";
 
@@ -13,6 +13,10 @@ interface Props {
   onWord?: (index: number) => void;
   /** Narration ended; `completed` is false when it was stopped or blocked. */
   onFinished?: (completed: boolean) => void;
+  /** Player pause: freezes the video or narration where it is. */
+  paused?: boolean;
+  /** Playback position 0..1 for the player progress bar. */
+  onProgress?: (fraction: number) => void;
 }
 
 // Playback order: the step's own recorded video → the module intro video (first
@@ -27,13 +31,15 @@ function mouthFor(level: number): "0" | "1" | "2" {
 // Floating 3D presenter card that sits on the screenshot. While narrating, the voice
 // level swaps between closed/half/open mouth frames (lip movement) and drives a glow.
 // Remount (via `key`) to restart playback for a step.
-export default function AvatarPanel({ step, introUrl, narrate, onWord, onFinished }: Props) {
+export default function AvatarPanel({ step, introUrl, narrate, onWord, onFinished, paused = false, onProgress }: Props) {
   const [phase, setPhase] = useState<Phase>("step-video");
   const [videoReady, setVideoReady] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const handlersRef = useRef({ onWord, onFinished });
-  handlersRef.current = { onWord, onFinished };
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const controlRef = useRef<NarrationControl | null>(null);
+  const handlersRef = useRef({ onWord, onFinished, onProgress });
+  handlersRef.current = { onWord, onFinished, onProgress };
 
   const videoSrc = phase === "step-video" ? avatarVideoUrl(step.id) : phase === "intro-video" ? introUrl : undefined;
 
@@ -44,7 +50,8 @@ export default function AvatarPanel({ step, introUrl, narrate, onWord, onFinishe
 
   useEffect(() => {
     if (phase !== "narration" || !narrate) return;
-    return startNarration(step.id, step.script, {
+    const ctl = startNarration(step.id, step.script, {
+      onProgress: (f) => handlersRef.current.onProgress?.(f),
       onStart: () => setSpeaking(true),
       onEnd: (completed) => {
         setSpeaking(false);
@@ -58,17 +65,35 @@ export default function AvatarPanel({ step, introUrl, narrate, onWord, onFinishe
         el.dataset.mouth = mouthFor(v);
       },
     });
+    controlRef.current = ctl;
+    return () => {
+      controlRef.current = null;
+      ctl();
+    };
   }, [phase, narrate, step.id, step.script]);
+
+  // Player pause / resume for whichever is playing (video or narration).
+  useEffect(() => {
+    const v = videoRef.current;
+    if (v && videoReady) {
+      if (paused) v.pause();
+      else void (v.play() as Promise<void> | undefined)?.catch?.(() => {});
+    } else if (controlRef.current) {
+      if (paused) controlRef.current.pause?.();
+      else controlRef.current.resume?.();
+    }
+  }, [paused, videoReady]);
 
   useEffect(() => () => stopSpeaking(), []);
 
-  const status = videoReady ? "▶ מציג סרטון" : speaking ? "🔊 מסביר…" : narrate ? "מוכן" : "🔇 קריינות כבויה";
+  const status = paused ? "⏸ מושהה" : videoReady ? "▶ מציג סרטון" : speaking ? "🔊 מסביר…" : narrate ? "מוכן" : "🔇 קריינות כבויה";
 
   return (
     <aside aria-label="העוזר הדיגיטלי, המדריך" className="avatar-stage">
       <div ref={cardRef} data-mouth="0" className={`avatar-3d ${speaking ? "is-speaking" : ""}`}>
         {videoSrc && (
           <video
+            ref={videoRef}
             key={videoSrc}
             src={videoSrc}
             autoPlay
@@ -82,6 +107,7 @@ export default function AvatarPanel({ step, introUrl, narrate, onWord, onFinishe
             onTimeUpdate={(e) => {
               // The step's own video speaks the script: drive the karaoke caption from it.
               const v = e.currentTarget;
+              if (v.duration > 0) handlersRef.current.onProgress?.(v.currentTime / v.duration);
               if (phase === "step-video" && v.duration > 0) handlersRef.current.onWord?.(wordAtProgress(step.script, v.currentTime / v.duration));
             }}
             onEnded={() => {

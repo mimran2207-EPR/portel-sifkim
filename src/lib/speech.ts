@@ -92,6 +92,22 @@ export function stopSpeaking(): void {
   }
 }
 
+export function pauseSpeaking(): void {
+  try {
+    synth()?.pause();
+  } catch {
+    /* ignore */
+  }
+}
+
+export function resumeSpeaking(): void {
+  try {
+    synth()?.resume();
+  } catch {
+    /* ignore */
+  }
+}
+
 export function isNarrationEnabled(): boolean {
   try {
     return window.localStorage.getItem(NARRATION_KEY) !== "off";

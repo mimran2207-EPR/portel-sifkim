@@ -2,7 +2,7 @@
 // is missing or can't be decoded, falls back to the browser's own Hebrew speech.
 // While speaking it reports the current word (karaoke caption) and a 0..1 voice level
 // (drives the avatar's "talking" animation).
-import { speak, stopSpeaking } from "./speech";
+import { pauseSpeaking, resumeSpeaking, speak, stopSpeaking } from "./speech";
 import { wordAtChar, wordAtProgress } from "./words";
 
 export function narrationUrl(id: string): string {
@@ -15,6 +15,15 @@ export interface NarrationHandlers {
   onEnd?: (completed: boolean) => void;
   onWord?: (index: number) => void;
   onLevel?: (level: number) => void;
+  /** Playback position 0..1 (drives the player progress bar). */
+  onProgress?: (fraction: number) => void;
+}
+
+/** Calling it stops the narration; it can also pause and resume it. */
+export type NarrationControl = (() => void) & { pause: () => void; resume: () => void };
+
+function control(stop: () => void, pause: () => void, resume: () => void): NarrationControl {
+  return Object.assign(stop, { pause, resume });
 }
 
 let audioCtx: AudioContext | undefined;
@@ -53,7 +62,7 @@ function analyserFor(audio: HTMLAudioElement): (() => number) | null {
 const synthetic = (t: number) => 0.35 + 0.3 * Math.abs(Math.sin(t / 90)) + 0.15 * Math.abs(Math.sin(t / 37));
 
 /** Starts narrating a step; returns a function that stops it. */
-export function narrate(id: string, text: string, handlers: NarrationHandlers = {}): () => void {
+export function narrate(id: string, text: string, handlers: NarrationHandlers = {}): NarrationControl {
   let stopped = false;
   let finished = false;
   let timer: ReturnType<typeof setInterval> | undefined;
@@ -87,7 +96,10 @@ export function narrate(id: string, text: string, handlers: NarrationHandlers = 
         handlers.onWord?.(0);
         loop((now) => handlers.onLevel?.(speaking ? synthetic(now) : 0));
       },
-      onBoundary: (c) => handlers.onWord?.(wordAtChar(text, c)),
+      onBoundary: (c) => {
+        handlers.onWord?.(wordAtChar(text, c));
+        handlers.onProgress?.(Math.min(1, c / Math.max(1, text.length)));
+      },
       onEnd: (completed) => {
         speaking = false;
         finish(completed);
@@ -99,11 +111,15 @@ export function narrate(id: string, text: string, handlers: NarrationHandlers = 
     audio = new Audio(narrationUrl(id));
   } catch {
     fallback();
-    return () => {
-      stopped = true;
-      stopSpeaking();
-      finish(false);
-    };
+    return control(
+      () => {
+        stopped = true;
+        stopSpeaking();
+        finish(false);
+      },
+      pauseSpeaking,
+      resumeSpeaking,
+    );
   }
 
   const a = audio;
@@ -111,11 +127,17 @@ export function narrate(id: string, text: string, handlers: NarrationHandlers = 
     handlers.onStart?.();
     const level = analyserFor(a);
     loop((now) => {
-      if (a.duration > 0) handlers.onWord?.(wordAtProgress(text, a.currentTime / a.duration));
+      if (a.duration > 0) {
+        handlers.onWord?.(wordAtProgress(text, a.currentTime / a.duration));
+        handlers.onProgress?.(a.currentTime / a.duration);
+      }
       handlers.onLevel?.(a.paused ? 0 : level ? level() : synthetic(now));
     });
   };
-  a.onended = () => finish(true);
+  a.onended = () => {
+    handlers.onProgress?.(1);
+    finish(true);
+  };
   a.onerror = () => {
     if (!stopped) fallback();
   };
@@ -126,10 +148,20 @@ export function narrate(id: string, text: string, handlers: NarrationHandlers = 
     if (err instanceof DOMException && err.name === "NotAllowedError") finish(false);
   });
 
-  return () => {
-    stopped = true;
-    a.pause();
-    stopSpeaking();
-    finish(false);
-  };
+  return control(
+    () => {
+      stopped = true;
+      a.pause();
+      stopSpeaking();
+      finish(false);
+    },
+    () => {
+      a.pause();
+      pauseSpeaking();
+    },
+    () => {
+      if (a.error) resumeSpeaking();
+      else void (a.play() as Promise<void> | undefined)?.catch?.(() => {});
+    },
+  );
 }

@@ -45,6 +45,8 @@ export default function App() {
   const [narrate, setNarrate] = useState(isNarrationEnabled);
   const [autoAdvance, setAutoAdvance] = useState(loadAuto);
   const [activeWord, setActiveWord] = useState(-1);
+  const [paused, setPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
   const autoTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const step = allSteps[index];
@@ -66,6 +68,8 @@ export default function App() {
   useEffect(() => {
     setLast(step.id);
     setActiveWord(-1);
+    setPaused(false);
+    setProgress(0);
     return () => clearTimeout(autoTimer.current);
   }, [step.id, replay]);
 
@@ -175,6 +179,8 @@ export default function App() {
                 narrate={narrate}
                 onWord={setActiveWord}
                 onFinished={onNarrationFinished}
+                paused={paused}
+                onProgress={setProgress}
               />
             }
           />
@@ -190,6 +196,9 @@ export default function App() {
               onToggleNarrate={toggleNarrate}
               autoAdvance={autoAdvance}
               onToggleAuto={toggleAuto}
+              paused={paused}
+              onTogglePause={() => setPaused((v) => !v)}
+              progress={progress}
             />
           </div>
         </main>
