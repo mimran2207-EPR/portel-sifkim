@@ -6,6 +6,7 @@ import ModuleNav from "./components/ModuleNav";
 import StepStage from "./components/StepStage";
 import AvatarPanel from "./components/AvatarPanel";
 import Controls from "./components/Controls";
+import ProcessStepper from "./components/ProcessStepper";
 import { moduleIntroUrl } from "./lib/media";
 import { isNarrationEnabled, setNarrationEnabled, stopSpeaking } from "./lib/speech";
 
@@ -155,12 +156,17 @@ export default function App() {
           />
         </div>
         <main className="flex min-w-0 flex-col gap-4 xl:col-start-2 xl:row-start-1">
+          <ProcessStepper modules={modules} currentId={step.id} done={done} onSelect={select} />
           <StepStage
             key={step.id}
             module={found.module}
             step={step}
             focusTitle={navigated}
             activeWord={activeWord}
+            onPrev={goPrev}
+            onNext={goNext}
+            canPrev={!isFirst}
+            canNext={!isLast}
             presenter={
               <AvatarPanel
                 key={`${step.id}-${replay}`}

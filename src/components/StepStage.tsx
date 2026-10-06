@@ -11,6 +11,11 @@ interface Props {
   activeWord?: number;
   /** Floating presenter (avatar) drawn over a corner of the screenshot. */
   presenter?: ReactNode;
+  /** Side arrows on the screenshot (previous / next screen). */
+  onPrev?: () => void;
+  onNext?: () => void;
+  canPrev?: boolean;
+  canNext?: boolean;
 }
 
 function HighlightRing({ step }: { step: Step }) {
@@ -41,7 +46,10 @@ function Placeholder({ module, step }: Props) {
   );
 }
 
-export default function StepStage({ module, step, focusTitle = false, activeWord = -1, presenter }: Props) {
+const arrow =
+  "absolute top-[42%] z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-2xl text-[#0e7c9b] shadow-lg ring-1 ring-slate-200 backdrop-blur transition hover:scale-110 hover:bg-white focus-visible:outline-2 focus-visible:outline-[#0e7c9b] disabled:pointer-events-none disabled:opacity-0 md:h-14 md:w-14";
+
+export default function StepStage({ module, step, focusTitle = false, activeWord = -1, presenter, onPrev, onNext, canPrev = true, canNext = true }: Props) {
   const [failed, setFailed] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<string | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -62,7 +70,7 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
       </div>
 
       {/* Width is capped from viewport height so image + ring scale together (keeps % coords exact). */}
-      <div className="relative mx-auto w-full max-w-[max(18rem,calc((100vh-10rem)*2.05))]">
+      <div className="relative mx-auto w-full max-w-[max(18rem,calc((100vh-17rem)*2.05))]">
         {showImage ? (
           <div className="relative overflow-hidden rounded-xl border border-slate-100">
             <img
@@ -82,12 +90,23 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
             <HighlightRing step={step} />
           </div>
         )}
+        {/* RTL: previous screen on the right edge, next screen on the left edge */}
+        {onPrev && (
+          <button type="button" aria-label="המסך הקודם" onClick={onPrev} disabled={!canPrev} className={`${arrow} right-1 md:-right-5`}>
+            <span aria-hidden="true">›</span>
+          </button>
+        )}
+        {onNext && (
+          <button type="button" aria-label="המסך הבא" onClick={onNext} disabled={!canNext} className={`${arrow} left-1 md:-left-5`}>
+            <span aria-hidden="true">‹</span>
+          </button>
+        )}
         {presenter && (
           // Always the same corner (bottom-left) so the presenter never jumps between steps.
           <div
             data-testid="presenter-slot"
             style={{ ["--tilt" as string]: -1 }}
-            className="absolute bottom-0 left-1 z-20 w-[clamp(64px,18%,240px)] translate-y-[4%] md:-translate-x-[34%]"
+            className="absolute bottom-0 left-1 z-20 w-[clamp(44px,15%,240px)] md:w-[clamp(64px,18%,240px)] translate-y-[4%] md:-translate-x-[34%]"
           >
             {presenter}
           </div>
