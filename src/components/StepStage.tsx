@@ -87,7 +87,7 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
           <div
             data-testid="presenter-slot"
             style={{ ["--tilt" as string]: -1 }}
-            className="absolute bottom-0 left-1 z-10 w-[clamp(64px,17%,220px)] translate-y-[8%] md:-translate-x-[22%]"
+            className="absolute bottom-0 left-1 z-20 w-[clamp(64px,18%,240px)] translate-y-[4%] md:-translate-x-[34%]"
           >
             {presenter}
           </div>

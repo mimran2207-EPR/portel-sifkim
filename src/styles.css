@@ -40,36 +40,32 @@ body {
 
 .avatar-3d {
   position: relative;
-  overflow: hidden;
-  border-radius: 1.25rem;
-  background: #fff;
   transform-style: preserve-3d;
-  box-shadow:
-    0 28px 48px -18px rgba(8, 60, 80, 0.6),
-    0 0 0 3px rgba(255, 255, 255, 0.95),
-    0 0 calc(10px + var(--lvl, 0) * 40px) rgba(79, 209, 181, calc(0.35 + var(--lvl, 0) * 0.6));
+  /* free-standing figure (transparent background): depth via drop shadows, glow follows the voice */
+  filter: drop-shadow(0 22px 18px rgba(8, 60, 80, 0.45))
+    drop-shadow(0 0 calc(var(--lvl, 0) * 18px) rgba(79, 209, 181, 0.95));
   animation: avatar-sway 7s ease-in-out infinite;
-  transition: box-shadow 90ms linear;
+  transition: filter 90ms linear;
 }
 
 @keyframes avatar-sway {
   0%,
   100% {
-    transform: rotateY(calc(var(--tilt, -1) * 16deg)) rotateX(5deg) translateY(0);
+    transform: rotateY(calc(var(--tilt, -1) * 14deg)) rotateX(3deg) translateY(0);
   }
   50% {
-    transform: rotateY(calc(var(--tilt, -1) * 7deg)) rotateX(2deg) translateY(-8px);
+    transform: rotateY(calc(var(--tilt, -1) * 6deg)) rotateX(1deg) translateY(-6px);
   }
 }
 
 .avatar-face {
   position: relative;
-  aspect-ratio: 452 / 560;
+  aspect-ratio: 540 / 960;
   transition: transform 90ms linear;
 }
 
 .is-speaking .avatar-face {
-  transform: translateY(calc(var(--lvl, 0) * -3px)) rotate(calc(var(--lvl, 0) * 1.2deg));
+  transform: translateY(calc(var(--lvl, 0) * -3px)) rotate(calc(var(--lvl, 0) * 1deg));
 }
 
 .avatar-frame,
@@ -78,13 +74,13 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: 50% 20%;
+  object-fit: contain;
+  object-position: 50% 100%;
 }
 
 .avatar-media {
   position: relative;
-  aspect-ratio: 452 / 560;
+  aspect-ratio: 540 / 960;
 }
 
 /* Frame 0 (closed mouth) always shows; half/open frames overlay it by voice level. */
@@ -98,17 +94,19 @@ body {
 }
 
 .avatar-tag {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
+  margin: 0.15rem auto 0;
   display: flex;
+  width: max-content;
+  max-width: 100%;
   flex-direction: column;
   align-items: center;
-  gap: 0.1rem;
-  padding: 1.6rem 0.5rem 0.45rem;
-  font-size: clamp(0.7rem, 1.1vw, 0.9rem);
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  font-size: clamp(0.65rem, 1vw, 0.85rem);
+  line-height: 1.25;
   color: #fff;
-  background: linear-gradient(to top, rgba(8, 60, 80, 0.85), transparent);
+  background: linear-gradient(90deg, #0e7c9b, #4fd1b5);
+  box-shadow: 0 4px 10px -4px rgba(8, 60, 80, 0.5);
 }
 
 /* Spotlight: dim the screenshot around the highlighted area. */

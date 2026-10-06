@@ -64,4 +64,17 @@ describe("AvatarPanel playback order", () => {
     expect(card.dataset.mouth).toBe("2");
     expect(card.style.getPropertyValue("--lvl")).toBe("0.700");
   });
+
+  it("a step video drives the caption and finishes the step", () => {
+    const onWord = vi.fn();
+    const onFinished = vi.fn();
+    const { container } = render(<AvatarPanel step={step} narrate onWord={onWord} onFinished={onFinished} />);
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "duration", { value: 10, configurable: true });
+    Object.defineProperty(video, "currentTime", { value: 9.9, configurable: true });
+    fireEvent.timeUpdate(video);
+    expect(onWord).toHaveBeenLastCalledWith(2);
+    fireEvent.ended(video);
+    expect(onFinished).toHaveBeenCalledWith(true);
+  });
 });

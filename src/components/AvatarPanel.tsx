@@ -3,6 +3,7 @@ import type { Step } from "../content/types";
 import { TALK_FRAMES, avatarVideoUrl } from "../lib/media";
 import { narrate as startNarration } from "../lib/narration";
 import { stopSpeaking } from "../lib/speech";
+import { wordAtProgress } from "../lib/words";
 
 interface Props {
   step: Step;
@@ -78,10 +79,17 @@ export default function AvatarPanel({ step, introUrl, narrate, onWord, onFinishe
             onLoadedData={() => setVideoReady(true)}
             onCanPlay={() => setVideoReady(true)}
             onError={videoFailed}
+            onTimeUpdate={(e) => {
+              // The step's own video speaks the script: drive the karaoke caption from it.
+              const v = e.currentTarget;
+              if (phase === "step-video" && v.duration > 0) handlersRef.current.onWord?.(wordAtProgress(step.script, v.currentTime / v.duration));
+            }}
             onEnded={() => {
               if (phase === "intro-video") {
                 setVideoReady(false);
                 setPhase("narration");
+              } else {
+                handlersRef.current.onFinished?.(true);
               }
             }}
           />
