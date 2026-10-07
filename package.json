@@ -4,7 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "videos": "node scripts/list-videos.mjs",
+    "predev": "node scripts/list-videos.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/list-videos.mjs",
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "deploy": "wrangler deploy",

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Step } from "../content/types";
-import { TALK_FRAMES, avatarVideoUrl } from "../lib/media";
+import { TALK_FRAMES, avatarVideoUrl, hasStepVideo } from "../lib/media";
 import { narrate as startNarration, type NarrationControl } from "../lib/narration";
 import { stopSpeaking } from "../lib/speech";
 import { wordAtProgress } from "../lib/words";
@@ -32,7 +32,8 @@ function mouthFor(level: number): "0" | "1" | "2" {
 // level swaps between closed/half/open mouth frames (lip movement) and drives a glow.
 // Remount (via `key`) to restart playback for a step.
 export default function AvatarPanel({ step, introUrl, narrate, onWord, onFinished, paused = false, onProgress }: Props) {
-  const [phase, setPhase] = useState<Phase>("step-video");
+  // Only request videos that exist: a missing one would load the SPA page instead.
+  const [phase, setPhase] = useState<Phase>(() => (hasStepVideo(step.id) ? "step-video" : introUrl ? "intro-video" : "narration"));
   const [videoReady, setVideoReady] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);

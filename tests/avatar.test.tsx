@@ -29,6 +29,13 @@ describe("AvatarPanel playback order", () => {
     expect(speak).toHaveBeenCalledTimes(1);
   });
 
+  it("skips the video request for a step without a recorded video", () => {
+    const speak = vi.spyOn(narration, "narrate").mockImplementation(() => () => {});
+    const { container } = render(<AvatarPanel step={{ ...step, id: "9.9" }} narrate />);
+    expect(container.querySelector("video")).toBeNull();
+    expect(speak).toHaveBeenCalledTimes(1);
+  });
+
   it("stays silent when narration is off", () => {
     const speak = vi.spyOn(narration, "narrate").mockImplementation(() => () => {});
     const { container } = render(<AvatarPanel step={step} narrate={false} />);
