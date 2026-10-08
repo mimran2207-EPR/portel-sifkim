@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import AvatarPanel from "../src/components/AvatarPanel";
 import * as narration from "../src/lib/narration";
 
-const step = { id: "1.1", title: "בחירת רשות", script: "נתחיל בכניסה לפורטל" };
+const step = { id: "1.3", title: "קוד אימות", script: "עכשיו יישלח אליכם קוד אימות" };
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -11,7 +11,7 @@ describe("AvatarPanel playback order", () => {
     const speak = vi.spyOn(narration, "narrate").mockImplementation(() => () => {});
     const { container } = render(<AvatarPanel step={step} introUrl="/avatar/m1.mp4" narrate />);
 
-    expect(container.querySelector("video")!.getAttribute("src")).toBe("/avatar/1.1.mp4");
+    expect(container.querySelector("video")!.getAttribute("src")).toBe("/avatar/1.3.mp4");
     fireEvent.error(container.querySelector("video")!);
 
     expect(container.querySelector("video")!.getAttribute("src")).toBe("/avatar/m1.mp4");
@@ -80,7 +80,7 @@ describe("AvatarPanel playback order", () => {
     Object.defineProperty(video, "duration", { value: 10, configurable: true });
     Object.defineProperty(video, "currentTime", { value: 9.9, configurable: true });
     fireEvent.timeUpdate(video);
-    expect(onWord).toHaveBeenLastCalledWith(2);
+    expect(onWord).toHaveBeenLastCalledWith(4); // last of the 5 words
     fireEvent.ended(video);
     expect(onFinished).toHaveBeenCalledWith(true);
   });

@@ -11,7 +11,8 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "deploy": "wrangler deploy",
-    "heygen": "tsx scripts/build-heygen-scripts.ts"
+    "heygen": "tsx scripts/build-heygen-scripts.ts",
+    "batches": "tsx scripts/build-batches.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
