@@ -117,7 +117,13 @@ def main() -> None:
     weights = [narration_seconds(s["id"]) or len(s["script"].split()) / 2.5 for s in batch["steps"]]
     scale = (t1 - t0) / sum(weights)
     pred = [w * scale for w in weights]
-    cuts = [0.0] + best_cuts(gaps, t0, t1, pred) + [duration]
+    # Verified cut points (e.g. from speech recognition of where each step's first words start)
+    # override the estimate: private/videos/batch-<n>-cuts.json = [cut between step 1 and 2, ...].
+    fixed = ROOT / "private" / "videos" / f"batch-{n}-cuts.json"
+    inner = json.loads(fixed.read_text()) if fixed.exists() else best_cuts(gaps, t0, t1, pred)
+    if len(inner) != len(batch["steps"]) - 1:
+        sys.exit(f"{fixed.name}: expected {len(batch['steps']) - 1} cuts, got {len(inner)}")
+    cuts = [0.0] + inner + [duration]
     if "--dry" in sys.argv or "--check" in sys.argv:
         for i, step in enumerate(batch["steps"]):
             print(f"{step['id']}: {cuts[i]:6.1f} → {cuts[i + 1]:6.1f}  ({cuts[i + 1] - cuts[i]:4.1f}s)")

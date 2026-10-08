@@ -8,6 +8,7 @@ Requires: pip install opencv-python-headless imageio-ffmpeg
 """
 
 import argparse
+import sys
 import pathlib
 import subprocess
 import tempfile
@@ -35,6 +36,7 @@ def alpha_mask(frame: np.ndarray, threshold: int = 22) -> np.ndarray:
 
 
 def main() -> None:
+    sys.stdout.reconfigure(encoding="utf-8")  # Hebrew folder names in the printed paths
     ap = argparse.ArgumentParser()
     ap.add_argument("src")
     ap.add_argument("dst")
