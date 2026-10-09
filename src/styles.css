@@ -298,3 +298,9 @@ body {
     font-size: 0.7rem;
   }
 }
+
+/* Zoomed screenshot: thin scrollbars so the learner sees there is more to scroll to. */
+.pan-box {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(14, 124, 155, 0.45) transparent;
+}

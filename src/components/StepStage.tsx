@@ -88,7 +88,8 @@ function useIsMobile(): boolean {
 function useZoom(step: Step, enabled: boolean, frameRef: React.RefObject<HTMLDivElement | null>, ratio: number | null, fitH?: number) {
   const [box, setBox] = useState<{ frameH: number; w: number; left: number; top: number } | null>(null);
   useLayoutEffect(() => {
-    const h = step.highlight;
+    // Wide screens: a step without a marked area is shown full width from its top.
+    const h = step.highlight ?? (fitH ? { x: 0, y: 0, w: 100, h: 100 } : undefined);
     const el = frameRef.current;
     if (!enabled || !h || !el || !ratio) return setBox(null);
     const calc = () => {
@@ -135,6 +136,11 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
   const fitH = useFitHeight(step.tip || step.warning ? 20.25 : 17.5);
   const zoom = useZoom(step, !fullView && showImage, frameRef, ratio, isMobile ? undefined : fitH);
   const spoken = captionText ?? step.script;
+  const panRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = panRef.current;
+    if (zoom && el) el.scrollTo?.({ left: -zoom.left, top: step.highlight ? -zoom.top : 0 });
+  }, [zoom, step.highlight]);
 
   return (
     <section aria-labelledby="step-title" className="rounded-2xl bg-white p-3 shadow-sm md:px-3 md:py-2">
@@ -151,10 +157,9 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
       <div className={`relative mx-auto w-full ${zoom && !isMobile ? "" : "stage-fit"} ${step.tip || step.warning ? "has-notes" : ""}`}>
         {showImage ? (
           <div ref={frameRef} className="relative overflow-hidden rounded-xl border border-slate-100" style={zoom ? { height: zoom.frameH } : undefined}>
-            <div
-              className={zoom ? "absolute transition-[left,top] duration-500" : "relative"}
-              style={zoom ? { width: zoom.w, left: zoom.left, top: zoom.top } : undefined}
-            >
+            {/* Zoomed: a scroll box opened on the marked area, so the rest can be reached by scrolling or dragging. */}
+            <div ref={panRef} dir="ltr" className={zoom ? "pan-box absolute inset-0 overflow-auto overscroll-contain" : "contents"}>
+            <div className="relative" style={zoom ? { width: zoom.w } : undefined}>
               <img
                 key={step.id}
                 data-role="screen"
@@ -170,13 +175,14 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
               />
               <HighlightRing step={step} />
             </div>
-            {step.highlight && (
+            </div>
+            {(step.highlight || zoom || fullView) && (
               <button
                 type="button"
                 onClick={() => setFullView((v) => !v)}
                 className="absolute right-2 top-2 z-30 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-[#0e7c9b] shadow ring-1 ring-slate-200"
               >
-                {fullView ? "🔍 התמקד באזור" : "⤢ כל המסך"}
+                {fullView ? (step.highlight ? "🔍 התמקד באזור" : "🔍 הגדל") : "⤢ כל המסך"}
               </button>
             )}
           </div>
