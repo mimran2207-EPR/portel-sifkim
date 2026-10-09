@@ -2,19 +2,26 @@
 // so the presenter records a few videos instead of one per step. scripts/split-batch.py later cuts each
 // downloaded batch back into one video per step.
 //   npm run batches   → docs/heygen-batches.md (to paste) + docs/heygen-batches.json (for the splitter)
-import { writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { allSteps as everyStep } from "../src/content/lessons";
 
 // Steps before FROM already have their video; only these are recorded in batches.
+// `npm run batches -- 1.1 2.3` instead appends one "completion" batch with just those steps,
+// keeping the batches already recorded.
 const FROM = "3.1";
-const allSteps = everyStep.slice(everyStep.findIndex((s) => s.id === FROM));
+const only = process.argv.slice(2);
+const allSteps = only.length
+  ? everyStep.filter((s) => only.includes(s.id))
+  : everyStep.slice(everyStep.findIndex((s) => s.id === FROM));
 
 const LIMIT = 4950; // HeyGen allows 5000 characters per video; keep a small margin
 const SEP = "\n\n"; // a blank line between steps → a longer pause the splitter can find
 
 type Batch = { n: number; steps: { id: string; title: string; script: string }[] };
+const recorded: Batch[] =
+  only.length && existsSync("docs/heygen-batches.json") ? JSON.parse(readFileSync("docs/heygen-batches.json", "utf8")) : [];
 const batches: Batch[] = [];
-let cur: Batch = { n: 1, steps: [] };
+let cur: Batch = { n: recorded.length + 1, steps: [] };
 let len = 0;
 for (const s of allSteps) {
   const add = s.script.length + (cur.steps.length ? SEP.length : 0);
@@ -55,6 +62,14 @@ const md: string[] = [
 for (const b of batches) {
   md.push(`## סרטון ${b.n}: שלבים ${b.steps[0].id} – ${b.steps.at(-1)!.id}`, "", "קובץ: `batch-" + b.n + ".mp4`", "", "```text", text(b), "```", "");
 }
-writeFileSync("docs/heygen-batches.md", md.join("\n"), "utf8");
-writeFileSync("docs/heygen-batches.json", JSON.stringify(batches, null, 2), "utf8");
+if (only.length) {
+  // completion batch: append its section, keep the batches already recorded
+  const sec = md.slice(md.findIndex((l) => l.startsWith("## סרטון ")));
+  const prev = existsSync("docs/heygen-batches.md") ? readFileSync("docs/heygen-batches.md", "utf8") : "";
+  writeFileSync("docs/heygen-batches.md", prev.trimEnd() + "\n\n" + sec.join("\n"), "utf8");
+  writeFileSync("docs/heygen-batches.json", JSON.stringify([...recorded, ...batches], null, 2), "utf8");
+} else {
+  writeFileSync("docs/heygen-batches.md", md.join("\n"), "utf8");
+  writeFileSync("docs/heygen-batches.json", JSON.stringify(batches, null, 2), "utf8");
+}
 console.log(batches.map((b) => `batch ${b.n}: ${b.steps.length} steps, ${text(b).length} chars`).join("\n"));
