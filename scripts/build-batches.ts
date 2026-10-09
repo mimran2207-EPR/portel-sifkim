@@ -3,7 +3,13 @@
 // downloaded batch back into one video per step.
 //   npm run batches   → docs/heygen-batches.md (to paste) + docs/heygen-batches.json (for the splitter)
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { allSteps as everyStep } from "../src/content/lessons";
+import { allSteps as steps, modules } from "../src/content/lessons";
+
+// Module opening videos are recorded like steps, with ids "m1", "m2"… (→ public/avatar/m<id>.mp4).
+const everyStep = [
+  ...steps,
+  ...modules.filter((m) => m.intro).map((m) => ({ id: `m${m.id}`, title: `פתיחה: ${m.title}`, script: m.intro! })),
+];
 
 // Steps before FROM already have their video; only these are recorded in batches.
 // `npm run batches -- 1.1 2.3` instead appends one "completion" batch with just those steps,
@@ -12,7 +18,7 @@ const FROM = "3.1";
 const only = process.argv.slice(2);
 const allSteps = only.length
   ? everyStep.filter((s) => only.includes(s.id))
-  : everyStep.slice(everyStep.findIndex((s) => s.id === FROM));
+  : steps.slice(steps.findIndex((s) => s.id === FROM));
 
 const LIMIT = 4950; // HeyGen allows 5000 characters per video; keep a small margin
 const SEP = "\n\n"; // a blank line between steps → a longer pause the splitter can find
