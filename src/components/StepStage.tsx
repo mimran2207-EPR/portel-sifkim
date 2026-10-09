@@ -50,6 +50,23 @@ function Placeholder({ module, step }: Props) {
   );
 }
 
+// Height left for the screenshot: the window minus everything around it (`chromeRem`).
+function useFitHeight(chromeRem: number): number {
+  const get = () => {
+    if (typeof window === "undefined") return 400;
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    return Math.max(260, window.innerHeight - chromeRem * rem);
+  };
+  const [h, setH] = useState(get);
+  useEffect(() => {
+    const on = () => setH(get());
+    on();
+    window.addEventListener("resize", on);
+    return () => window.removeEventListener("resize", on);
+  }, [chromeRem]);
+  return h;
+}
+
 // Phones: true below the md breakpoint (768px).
 function useIsMobile(): boolean {
   const query = "(max-width: 767px)";
@@ -65,9 +82,10 @@ function useIsMobile(): boolean {
   return mobile;
 }
 
-// On phones the screenshot is zoomed onto the highlighted area so it is readable;
-// returns the frame height and the zoomed image box (px), or null when not zooming.
-function useZoom(step: Step, enabled: boolean, frameRef: React.RefObject<HTMLDivElement | null>, ratio: number | null) {
+// The screenshot is zoomed onto the highlighted area so it is readable: on phones by a
+// fixed factor; on wider screens (`fitH` = the height available for it) so the area fills
+// the full-width frame. Returns the frame height and the zoomed image box (px), or null.
+function useZoom(step: Step, enabled: boolean, frameRef: React.RefObject<HTMLDivElement | null>, ratio: number | null, fitH?: number) {
   const [box, setBox] = useState<{ frameH: number; w: number; left: number; top: number } | null>(null);
   useLayoutEffect(() => {
     const h = step.highlight;
@@ -75,10 +93,16 @@ function useZoom(step: Step, enabled: boolean, frameRef: React.RefObject<HTMLDiv
     if (!enabled || !h || !el || !ratio) return setBox(null);
     const calc = () => {
       const W = el.clientWidth;
-      const zoom = Math.min(3, Math.max(1.5, 75 / h.w));
+      let zoom = Math.min(3, Math.max(1.5, 75 / h.w));
+      if (fitH) {
+        const fill = (fitH * ratio) / W; // image as tall as the frame
+        const byW = 60 / h.w; // highlighted area ≈ 60% of the width (keeps its surroundings)
+        const byH = (0.6 * fitH * ratio * 100) / (h.h * W); // …and of the height
+        zoom = Math.max(1, fill, Math.min(byW, byH, 1.9));
+      }
       const w = W * zoom;
       const innerH = w / ratio;
-      const frameH = Math.min(W * 0.8, innerH);
+      const frameH = fitH ? Math.min(fitH, innerH) : Math.min(W * 0.8, innerH);
       const cx = ((h.x + h.w / 2) / 100) * w;
       const cy = ((h.y + h.h / 2) / 100) * innerH;
       const left = Math.min(0, Math.max(W - w, W / 2 - cx));
@@ -89,7 +113,7 @@ function useZoom(step: Step, enabled: boolean, frameRef: React.RefObject<HTMLDiv
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(calc) : null;
     ro?.observe(el);
     return () => ro?.disconnect();
-  }, [step, enabled, frameRef, ratio]);
+  }, [step, enabled, frameRef, ratio, fitH]);
   return box;
 }
 
@@ -108,7 +132,8 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
   const [ratio, setRatio] = useState<number | null>(null);
   const [fullView, setFullView] = useState(false);
   const frameRef = useRef<HTMLDivElement>(null);
-  const zoom = useZoom(step, isMobile && !fullView && showImage, frameRef, ratio);
+  const fitH = useFitHeight(step.tip || step.warning ? 20.25 : 17.5);
+  const zoom = useZoom(step, !fullView && showImage, frameRef, ratio, isMobile ? undefined : fitH);
   const spoken = captionText ?? step.script;
 
   return (
@@ -123,7 +148,7 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
       </div>
 
       {/* Width is capped from viewport height so image + ring scale together (keeps % coords exact). */}
-      <div className={`stage-fit relative mx-auto w-full ${step.tip || step.warning ? "has-notes" : ""}`}>
+      <div className={`relative mx-auto w-full ${zoom && !isMobile ? "" : "stage-fit"} ${step.tip || step.warning ? "has-notes" : ""}`}>
         {showImage ? (
           <div ref={frameRef} className="relative overflow-hidden rounded-xl border border-slate-100" style={zoom ? { height: zoom.frameH } : undefined}>
             <div
@@ -145,13 +170,13 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
               />
               <HighlightRing step={step} />
             </div>
-            {isMobile && step.highlight && (
+            {step.highlight && (
               <button
                 type="button"
                 onClick={() => setFullView((v) => !v)}
                 className="absolute right-2 top-2 z-30 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-[#0e7c9b] shadow ring-1 ring-slate-200"
               >
-                {fullView ? "🔍 התמקד באזור" : "⤢ מסך מלא"}
+                {fullView ? "🔍 התמקד באזור" : "⤢ כל המסך"}
               </button>
             )}
           </div>
