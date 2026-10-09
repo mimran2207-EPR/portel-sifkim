@@ -23,7 +23,7 @@ describe("App", () => {
     expect(screen.getAllByText("ברוכים הבאים").length).toBeGreaterThan(0);
     const s01 = findStep("0.1")!.step;
     expect(heading()).toHaveTextContent(s01.title);
-    expect(screen.getByTestId("caption")).toHaveTextContent(s01.script);
+    expect(screen.getByTestId("transcript")).toHaveTextContent(s01.script);
   });
 
   it("disables 'הקודם' on the first step", () => {
@@ -101,15 +101,15 @@ describe("App", () => {
     const video = container.querySelector("video")!;
     fireEvent.error(video);
     expect(container.querySelector("video")).toBeNull();
-    expect(screen.getByAltText("העוזר הדיגיטלי של EPR מערכות")).toBeInTheDocument();
-    expect(screen.getByTestId("caption")).toHaveTextContent(findStep("0.1")!.step.script);
+    expect(screen.getByAltText("אוהד מנקין, EPR מערכות")).toBeInTheDocument();
+    expect(screen.getByTestId("transcript")).toHaveTextContent(findStep("0.1")!.step.script);
   });
 
   it("swaps the still avatar for the video once the clip has data", () => {
     const { container } = render(<App />);
-    expect(screen.getByAltText("העוזר הדיגיטלי של EPR מערכות")).toBeInTheDocument();
+    expect(screen.getByAltText("אוהד מנקין, EPR מערכות")).toBeInTheDocument();
     fireEvent.loadedData(container.querySelector("video")!);
-    expect(screen.queryByAltText("העוזר הדיגיטלי של EPR מערכות")).toBeNull();
+    expect(screen.queryByAltText("אוהד מנקין, EPR מערכות")).toBeNull();
     expect(container.querySelector("video")).not.toHaveClass("hidden");
   });
 

@@ -45,6 +45,7 @@ export default function App() {
   const [narrate, setNarrate] = useState(isNarrationEnabled);
   const [autoAdvance, setAutoAdvance] = useState(loadAuto);
   const [activeWord, setActiveWord] = useState(-1);
+  const [introPlaying, setIntroPlaying] = useState(false);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const autoTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -147,7 +148,7 @@ export default function App() {
       {/* RTL: nav docks on the right only on wide screens (xl); below that it is a drawer
             opened from the header, so the screenshot gets the full width. The presenter
             (avatar) floats over a corner of the screenshot inside StepStage. */}
-      <div className="mx-auto grid w-full max-w-[100rem] flex-1 grid-cols-1 content-start gap-4 p-3 md:gap-6 md:p-6 xl:grid-cols-[17rem_minmax(0,1fr)]">
+      <div className="mx-auto grid w-full max-w-[100rem] flex-1 grid-cols-1 content-start gap-4 overflow-x-clip p-3 md:gap-4 md:p-4 xl:grid-cols-[17rem_minmax(0,1fr)]">
         <div className="xl:col-start-1 xl:row-start-1">
           <ModuleNav
             modules={modules}
@@ -159,7 +160,7 @@ export default function App() {
             onClose={() => setNavOpen(false)}
           />
         </div>
-        <main className="flex min-w-0 flex-col gap-4 xl:col-start-2 xl:row-start-1">
+        <main className="flex min-w-0 flex-col gap-3 xl:col-start-2 xl:row-start-1">
           <ProcessStepper modules={modules} currentId={step.id} done={done} onSelect={select} />
           <StepStage
             key={step.id}
@@ -167,6 +168,7 @@ export default function App() {
             step={step}
             focusTitle={navigated}
             activeWord={activeWord}
+            captionText={introPlaying ? found.module.intro : undefined}
             onPrev={goPrev}
             onNext={goNext}
             canPrev={!isFirst}
@@ -176,6 +178,8 @@ export default function App() {
                 key={`${step.id}-${replay}`}
                 step={step}
                 introUrl={introUrl}
+                introText={found.module.intro}
+                onIntro={setIntroPlaying}
                 narrate={narrate}
                 onWord={setActiveWord}
                 onFinished={onNarrationFinished}

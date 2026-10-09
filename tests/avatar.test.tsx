@@ -7,16 +7,19 @@ const step = { id: "1.3", title: "קוד אימות", script: "עכשיו ייש
 afterEach(() => vi.restoreAllMocks());
 
 describe("AvatarPanel playback order", () => {
-  it("step video → module intro video → narration", () => {
+  it("module opening video → the step's video → narration only if that fails", () => {
     const speak = vi.spyOn(narration, "narrate").mockImplementation(() => () => {});
-    const { container } = render(<AvatarPanel step={step} introUrl="/avatar/m1.mp4" narrate />);
-
-    expect(container.querySelector("video")!.getAttribute("src")).toBe("/avatar/1.3.mp4");
-    fireEvent.error(container.querySelector("video")!);
+    const onIntro = vi.fn();
+    const { container } = render(<AvatarPanel step={step} introUrl="/avatar/m1.mp4" introText="פתיחה" onIntro={onIntro} narrate />);
 
     expect(container.querySelector("video")!.getAttribute("src")).toBe("/avatar/m1.mp4");
-    expect(speak).not.toHaveBeenCalled();
+    expect(onIntro).toHaveBeenLastCalledWith(true);
     fireEvent.ended(container.querySelector("video")!);
+
+    expect(container.querySelector("video")!.getAttribute("src")).toBe("/avatar/1.3.mp4");
+    expect(onIntro).toHaveBeenLastCalledWith(false);
+    expect(speak).not.toHaveBeenCalled();
+    fireEvent.error(container.querySelector("video")!);
 
     expect(container.querySelector("video")).toBeNull();
     expect(speak).toHaveBeenCalledWith(step.id, step.script, expect.any(Object));
@@ -51,7 +54,7 @@ describe("AvatarPanel playback order", () => {
     });
     const { container } = render(<AvatarPanel step={step} narrate />);
     fireEvent.error(container.querySelector("video")!);
-    expect(screen.getByAltText("העוזר הדיגיטלי של EPR מערכות")).toHaveAttribute("data-speaking", "true");
+    expect(screen.getByAltText("אוהד מנקין, EPR מערכות")).toHaveAttribute("data-speaking", "true");
   });
 
   it("moves the mouth with the voice level", () => {

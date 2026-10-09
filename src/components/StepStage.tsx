@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 import type { Module, Step } from "../content/types";
 import { screenUrl } from "../lib/media";
 import KaraokeText from "./KaraokeText";
+import { stepLabel } from "../content/label";
+import { sentenceRange } from "../lib/words";
 
 interface Props {
   module: Module;
@@ -9,6 +11,8 @@ interface Props {
   focusTitle?: boolean;
   /** Word being narrated; highlighted in the caption. */
   activeWord?: number;
+  /** Text being spoken now when it is not the step script (the module opening video). */
+  captionText?: string;
   /** Floating presenter (avatar) drawn over a corner of the screenshot. */
   presenter?: ReactNode;
   /** Side arrows on the screenshot (previous / next screen). */
@@ -92,7 +96,7 @@ function useZoom(step: Step, enabled: boolean, frameRef: React.RefObject<HTMLDiv
 const arrow =
   "absolute top-[16%] z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-2xl text-[#0e7c9b] shadow-lg ring-1 ring-slate-200 backdrop-blur transition hover:scale-110 hover:bg-white focus-visible:outline-2 focus-visible:outline-[#0e7c9b] disabled:pointer-events-none disabled:opacity-0 md:h-14 md:w-14";
 
-export default function StepStage({ module, step, focusTitle = false, activeWord = -1, presenter, onPrev, onNext, canPrev = true, canNext = true }: Props) {
+export default function StepStage({ module, step, focusTitle = false, activeWord = -1, captionText, presenter, onPrev, onNext, canPrev = true, canNext = true }: Props) {
   const [failed, setFailed] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<string | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -105,12 +109,13 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
   const [fullView, setFullView] = useState(false);
   const frameRef = useRef<HTMLDivElement>(null);
   const zoom = useZoom(step, isMobile && !fullView && showImage, frameRef, ratio);
+  const spoken = captionText ?? step.script;
 
   return (
-    <section aria-labelledby="step-title" className="rounded-2xl bg-white p-3 shadow-sm md:p-4">
+    <section aria-labelledby="step-title" className="rounded-2xl bg-white p-3 shadow-sm md:px-4 md:py-3">
       <div className="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span className="rounded-full bg-[#0e7c9b]/10 px-3 py-0.5 text-xs font-medium text-[#0e7c9b]">
-          {module.icon} {module.title} · שלב {step.id}
+          {module.icon} {module.title} · שלב {stepLabel(step.id)}
         </span>
         <h2 id="step-title" ref={titleRef} tabIndex={-1} className="text-xl focus:outline-none font-bold text-slate-800 md:text-2xl">
           {step.title}
@@ -118,7 +123,7 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
       </div>
 
       {/* Width is capped from viewport height so image + ring scale together (keeps % coords exact). */}
-      <div className="relative mx-auto w-full max-w-[max(18rem,calc((100vh-17rem)*2.05))]">
+      <div className="stage-fit relative mx-auto w-full">
         {showImage ? (
           <div ref={frameRef} className="relative overflow-hidden rounded-xl border border-slate-100" style={zoom ? { height: zoom.frameH } : undefined}>
             <div
@@ -179,28 +184,34 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
         )}
       </div>
 
-      {step.warning && (
-        <div role="note" className="mt-4 flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          <span aria-hidden="true">⚠️</span>
-          <p>
-            <strong>שימו לב: </strong>
-            {step.warning}
-          </p>
-        </div>
-      )}
-      {step.tip && (
-        <div className="mt-4 flex gap-2 rounded-xl border border-[#4fd1b5]/50 bg-[#4fd1b5]/10 p-3 text-sm text-[#0b5f77]">
-          <span aria-hidden="true">💡</span>
-          <p>
-            <strong>טיפ: </strong>
-            {step.tip}
-          </p>
+      {/* Subtitles: the sentence being spoken, like a video's captions. Fixed height, so nothing jumps. */}
+      <div data-testid="caption" className="subtitles">
+        <p>
+          <KaraokeText text={spoken} active={activeWord} range={sentenceRange(spoken, Math.max(activeWord, 0))} />
+        </p>
+      </div>
+
+      {(step.warning || step.tip) && (
+        <div className="mt-2 flex flex-col gap-1.5">
+          {step.warning && (
+            <p role="note" className="note note-warn">
+              <span aria-hidden="true">⚠️</span> <strong>שימו לב:</strong> {step.warning}
+            </p>
+          )}
+          {step.tip && (
+            <p className="note note-tip">
+              <span aria-hidden="true">💡</span> <strong>טיפ:</strong> {step.tip}
+            </p>
+          )}
         </div>
       )}
 
-      <p data-testid="caption" className="mt-4 rounded-xl bg-slate-50 p-3 leading-relaxed text-slate-700 md:text-lg">
-        <KaraokeText text={step.script} active={activeWord} />
-      </p>
+      <details className="transcript mt-2">
+        <summary>התמלול המלא של השלב</summary>
+        <p data-testid="transcript">
+          <KaraokeText text={step.script} active={captionText ? -1 : activeWord} />
+        </p>
+      </details>
     </section>
   );
 }

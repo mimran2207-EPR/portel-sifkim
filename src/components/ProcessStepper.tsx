@@ -1,4 +1,5 @@
 import type { Module } from "../content/types";
+import { stepLabel } from "../content/label";
 
 interface Props {
   modules: Module[];
@@ -28,7 +29,7 @@ export default function ProcessStepper({ modules, currentId, done, onSelect }: P
   const stepIndex = current.steps.findIndex((s) => s.id === currentId);
 
   return (
-    <nav aria-label="תהליכי ההדרכה" className="rounded-2xl bg-white px-3 py-3 shadow-sm md:px-5">
+    <nav aria-label="תהליכי ההדרכה" className="rounded-2xl bg-white px-3 py-2.5 shadow-sm md:px-5 md:py-2">
       <ol className="flex items-start overflow-x-auto pb-1" data-testid="process-stepper">
         {modules.map((m, i) => {
           const st = moduleState(m, currentId, doneSet);
@@ -42,7 +43,7 @@ export default function ProcessStepper({ modules, currentId, done, onSelect }: P
                 className="group flex w-full flex-col items-center gap-1 focus:outline-none"
               >
                 <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-bold transition group-hover:scale-110 group-focus-visible:ring-4 group-focus-visible:ring-[#0e7c9b]/40 md:h-11 md:w-11 md:text-base ${circle[st]}`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-bold transition group-hover:scale-110 group-focus-visible:ring-4 group-focus-visible:ring-[#0e7c9b]/40 md:h-9 md:w-9 md:text-sm ${circle[st]}`}
                 >
                   {st === "done" ? "✓" : i + 1}
                 </span>
@@ -53,7 +54,7 @@ export default function ProcessStepper({ modules, currentId, done, onSelect }: P
               {i < modules.length - 1 && (
                 <span
                   aria-hidden="true"
-                  className={`mt-[1rem] h-0.5 min-w-2 flex-1 md:mt-[1.35rem] ${st === "done" ? "bg-[#4fd1b5]" : "bg-slate-200"}`}
+                  className={`mt-[1rem] h-0.5 min-w-2 flex-1 md:mt-[1.1rem] ${st === "done" ? "bg-[#4fd1b5]" : "bg-slate-200"}`}
                 />
               )}
             </li>
@@ -75,7 +76,7 @@ export default function ProcessStepper({ modules, currentId, done, onSelect }: P
                   type="button"
                   onClick={() => onSelect(s.id)}
                   aria-current={isCur ? "step" : undefined}
-                  aria-label={`שלב ${s.id}: ${s.title}`}
+                  aria-label={`שלב ${stepLabel(s.id)}: ${s.title}`}
                   title={s.title}
                   className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition hover:scale-110 focus-visible:outline-2 focus-visible:outline-[#0e7c9b] ${
                     isCur

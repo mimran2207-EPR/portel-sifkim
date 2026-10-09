@@ -9,7 +9,7 @@ export default function Header({ done, total, navOpen, onToggleNav }: Props) {
   const pct = total ? Math.round((done / total) * 100) : 0;
   return (
     <header className="muni-gradient text-white shadow-md">
-      <div className="flex items-center gap-3 px-4 py-3 md:px-6">
+      <div className="flex items-center gap-3 px-4 py-2.5 md:px-6 md:py-2">
         <button
           type="button"
           className="rounded-xl px-2 py-1 text-2xl leading-none hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white xl:hidden"
@@ -21,8 +21,8 @@ export default function Header({ done, total, navOpen, onToggleNav }: Props) {
           ☰
         </button>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-lg font-bold md:text-2xl">מרכז ההדרכה לספקים</h1>
-          <p className="hidden text-sm text-white/85 sm:block">פורטל הספקים Muni · הדרכה צעד אחר צעד</p>
+          <h1 className="truncate text-lg font-bold md:text-xl">מרכז ההדרכה לספקים</h1>
+          <p className="hidden text-xs text-white/85 sm:block">פורטל הספקים Muni · הדרכה צעד אחר צעד</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1" role="group" aria-label="התקדמות">
           <span className="text-sm font-medium" dir="ltr">

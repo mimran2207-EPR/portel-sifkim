@@ -10,7 +10,7 @@ export function screenUrl(id: string): string {
 
 /** The module's opening video, or undefined when none was recorded. */
 export function moduleIntroUrl(moduleId: string): string | undefined {
-  return MODULE_INTROS.includes(moduleId) ? `/avatar/m${moduleId}.mp4` : undefined;
+  return MODULE_INTROS.includes(moduleId) ? avatarVideoUrl(`m${moduleId}`) : undefined;
 }
 
 /** True when the step has its own recorded avatar video. */

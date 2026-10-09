@@ -8,7 +8,7 @@ const has = (ext) => new Set(files.filter((f) => f.endsWith(ext)).map((f) => f.s
 const mp4 = has(".mp4");
 const webm = has(".webm");
 const steps = [...mp4].filter((id) => /^\d+\.\d+$/.test(id) && webm.has(id)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-const intros = [...mp4].filter((id) => /^m\d+$/.test(id)).map((id) => id.slice(1)).sort();
+const intros = [...mp4].filter((id) => /^m\d+$/.test(id) && webm.has(id)).map((id) => id.slice(1)).sort();
 
 writeFileSync(
   new URL("../src/content/videos.ts", import.meta.url),

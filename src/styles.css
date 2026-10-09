@@ -220,3 +220,69 @@ body {
     transition: none;
   }
 }
+
+/* ---- Fit the whole lesson in the window at 100% zoom ----
+   The screenshot's width is capped from the window height minus everything around it
+   (header, topic strip, title, subtitles, player bar), so nothing needs scrolling. */
+.stage-fit {
+  --chrome: 30rem;
+  max-width: max(20rem, calc((100dvh - var(--chrome)) * 1.9));
+}
+@media (max-width: 767px) {
+  .stage-fit { max-width: none; }
+}
+
+/* Subtitles: the sentence being spoken, as on a video player. */
+.subtitles {
+  margin-top: 0.5rem;
+  min-height: 3.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: #0f2a36;
+  padding: 0.45rem 1rem;
+  text-align: center;
+  color: #f1f5f9;
+  font-size: clamp(1rem, 0.55rem + 0.75vw, 1.3rem);
+  font-weight: 500;
+  line-height: 1.55;
+}
+.subtitles p {
+  max-width: 62rem;
+  text-wrap: balance;
+}
+.subtitles .word-active {
+  background: none;
+  box-shadow: none;
+  color: #fde047;
+}
+.subtitles .word-spoken {
+  color: #f1f5f9;
+}
+
+/* Tip / warning: one compact line each under the subtitles. */
+.note {
+  border-radius: 0.6rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+.note-warn { border: 1px solid #fecaca; background: #fef2f2; color: #991b1b; }
+.note-tip { border: 1px solid rgba(79, 209, 181, 0.5); background: rgba(79, 209, 181, 0.1); color: #0b5f77; }
+
+/* Full transcript, folded by default. */
+.transcript summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0e7c9b;
+}
+.transcript p {
+  margin-top: 0.4rem;
+  border-radius: 0.6rem;
+  background: #f8fafc;
+  padding: 0.6rem 0.8rem;
+  line-height: 1.7;
+  color: #334155;
+}
