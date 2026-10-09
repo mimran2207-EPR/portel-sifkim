@@ -27,7 +27,7 @@ export default function ModuleNav({ modules, currentId, done, open, onSelect, on
       <nav
         id="module-nav"
         aria-label="תפריט מודולים"
-        className={`fixed inset-y-0 right-0 z-40 flex w-80 max-w-[85vw] flex-col bg-white shadow-xl transition-transform xl:sticky xl:top-6 xl:bottom-auto xl:z-auto xl:max-h-[calc(100vh-8rem)] xl:max-w-none xl:shrink-0 xl:translate-x-0 xl:self-start xl:rounded-2xl xl:shadow-sm xl:w-auto ${
+        className={`fixed inset-y-0 right-0 z-40 flex w-72 max-w-[80vw] flex-col bg-white shadow-xl transition-transform xl:sticky xl:top-6 xl:bottom-auto xl:z-auto xl:max-h-[calc(100vh-8rem)] xl:max-w-none xl:shrink-0 xl:translate-x-0 xl:self-start xl:rounded-2xl xl:shadow-sm xl:w-auto ${
           open ? "translate-x-0" : "max-xl:invisible translate-x-full"
         }`}
       >

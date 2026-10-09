@@ -112,18 +112,18 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
   const spoken = captionText ?? step.script;
 
   return (
-    <section aria-labelledby="step-title" className="rounded-2xl bg-white p-3 shadow-sm md:px-4 md:py-3">
-      <div className="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+    <section aria-labelledby="step-title" className="rounded-2xl bg-white p-3 shadow-sm md:px-3 md:py-2">
+      <div className="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 md:mb-1.5">
         <span className="rounded-full bg-[#0e7c9b]/10 px-3 py-0.5 text-xs font-medium text-[#0e7c9b]">
           {module.icon} {module.title} · שלב {stepLabel(step.id)}
         </span>
-        <h2 id="step-title" ref={titleRef} tabIndex={-1} className="text-xl focus:outline-none font-bold text-slate-800 md:text-2xl">
+        <h2 id="step-title" ref={titleRef} tabIndex={-1} className="text-xl focus:outline-none font-bold text-slate-800 md:text-lg">
           {step.title}
         </h2>
       </div>
 
       {/* Width is capped from viewport height so image + ring scale together (keeps % coords exact). */}
-      <div className="stage-fit relative mx-auto w-full">
+      <div className={`stage-fit relative mx-auto w-full ${step.tip || step.warning ? "has-notes" : ""}`}>
         {showImage ? (
           <div ref={frameRef} className="relative overflow-hidden rounded-xl border border-slate-100" style={zoom ? { height: zoom.frameH } : undefined}>
             <div
@@ -177,7 +177,7 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
           <div
             data-testid="presenter-slot"
             style={{ ["--tilt" as string]: -1 }}
-            className="presenter-slot absolute bottom-2 left-2 z-20 w-16 md:bottom-0 md:left-1 md:w-[clamp(64px,18%,240px)] md:translate-y-[4%] md:-translate-x-[34%]"
+            className="presenter-slot absolute bottom-2 left-2 z-20 w-16 md:bottom-0 md:left-1 md:w-[clamp(56px,10%,150px)] md:translate-y-[4%] md:-translate-x-[34%]"
           >
             {presenter}
           </div>

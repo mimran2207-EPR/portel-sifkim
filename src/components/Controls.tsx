@@ -74,7 +74,7 @@ function Labeled({ label, children }: { label: string; children: React.ReactNode
   return (
     <div className="flex flex-col items-center gap-0.5">
       {children}
-      <span className="text-[0.68rem] text-slate-500 md:text-xs" aria-hidden="true">
+      <span className="text-[0.68rem] text-slate-500 md:hidden" aria-hidden="true">
         {label}
       </span>
     </div>
@@ -84,7 +84,7 @@ function Labeled({ label, children }: { label: string; children: React.ReactNode
 export default function Controls(p: Props) {
   const toggle = (on: boolean) => (on ? "bg-[#0e7c9b]/10 text-[#0e7c9b]" : "bg-slate-100 text-slate-400");
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 md:gap-1">
       {/* playback progress of the current step */}
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200" role="progressbar" aria-label="התקדמות ההסבר" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(p.progress * 100)}>
         <div className="muni-gradient h-full transition-[width] duration-200" style={{ width: `${Math.round(p.progress * 100)}%` }} />
@@ -94,7 +94,7 @@ export default function Controls(p: Props) {
         {/* secondary (right side in RTL) */}
         <div className="flex items-center gap-2">
           <Labeled label="מההתחלה">
-            <button type="button" aria-label="השמע שוב" title="השמע שוב מההתחלה" onClick={p.onReplay} className={`${round} h-10 w-10 bg-slate-100 text-[#0e7c9b] hover:bg-slate-200`}>
+            <button type="button" aria-label="השמע שוב" title="השמע שוב מההתחלה" onClick={p.onReplay} className={`${round} h-10 w-10 md:h-8 md:w-8 bg-slate-100 text-[#0e7c9b] hover:bg-slate-200`}>
               {Icon.replay}
             </button>
           </Labeled>
@@ -105,7 +105,7 @@ export default function Controls(p: Props) {
               aria-label={p.narrate ? "קריינות פעילה" : "קריינות כבויה"}
               title={p.narrate ? "השתקת הקריינות" : "הפעלת הקריינות"}
               onClick={p.onToggleNarrate}
-              className={`${round} h-10 w-10 ${toggle(p.narrate)}`}
+              className={`${round} h-10 w-10 md:h-8 md:w-8 ${toggle(p.narrate)}`}
             >
               {p.narrate ? Icon.soundOn : Icon.soundOff}
             </button>
@@ -115,7 +115,7 @@ export default function Controls(p: Props) {
         {/* main transport */}
         <div className="flex items-center gap-3 md:gap-5">
           <Labeled label="הקודם">
-            <button type="button" aria-label="הקודם" title="המסך הקודם" onClick={p.onPrev} disabled={p.isFirst} className={`${round} h-11 w-11 bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50`}>
+            <button type="button" aria-label="הקודם" title="המסך הקודם" onClick={p.onPrev} disabled={p.isFirst} className={`${round} h-11 w-11 md:h-8 md:w-8 bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50`}>
               {Icon.prev}
             </button>
           </Labeled>
@@ -124,7 +124,7 @@ export default function Controls(p: Props) {
             aria-label={p.paused ? "המשך" : "השהה"}
             title={p.paused ? "המשך" : "השהה"}
             onClick={p.onTogglePause}
-            className={`${round} muni-gradient h-14 w-14 text-white shadow-md hover:brightness-105 md:h-16 md:w-16`}
+            className={`${round} muni-gradient h-14 w-14 text-white shadow-md hover:brightness-105 md:h-10 md:w-10`}
           >
             {p.paused ? Icon.play : Icon.pause}
           </button>
@@ -134,7 +134,7 @@ export default function Controls(p: Props) {
               aria-label={p.isLast ? "סיום ההדרכה" : "הבא"}
               title={p.isLast ? "סיום ההדרכה" : "המסך הבא"}
               onClick={p.onNext}
-              className={`${round} h-11 w-11 bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50`}
+              className={`${round} h-11 w-11 md:h-8 md:w-8 bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50`}
             >
               {p.isLast ? <span aria-hidden="true">🎉</span> : Icon.next}
             </button>
@@ -150,7 +150,7 @@ export default function Controls(p: Props) {
               aria-label={p.autoAdvance ? "מעבר אוטומטי" : "מעבר ידני"}
               title={p.autoAdvance ? "מעבר אוטומטי לשלב הבא (לחצו לביטול)" : "מעבר ידני (לחצו להפעלת מעבר אוטומטי)"}
               onClick={p.onToggleAuto}
-              className={`${round} h-10 w-10 ${toggle(p.autoAdvance)}`}
+              className={`${round} h-10 w-10 md:h-8 md:w-8 ${toggle(p.autoAdvance)}`}
             >
               {Icon.auto}
             </button>

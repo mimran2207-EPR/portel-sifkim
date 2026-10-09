@@ -148,7 +148,7 @@ export default function App() {
       {/* RTL: nav docks on the right only on wide screens (xl); below that it is a drawer
             opened from the header, so the screenshot gets the full width. The presenter
             (avatar) floats over a corner of the screenshot inside StepStage. */}
-      <div className="mx-auto grid w-full max-w-[100rem] flex-1 grid-cols-1 content-start gap-4 overflow-x-clip p-3 md:gap-4 md:p-4 xl:grid-cols-[17rem_minmax(0,1fr)]">
+      <div className="mx-auto grid w-full max-w-[100rem] flex-1 grid-cols-1 content-start gap-4 overflow-x-clip p-3 md:gap-3 md:p-3 xl:grid-cols-[14.5rem_minmax(0,1fr)]">
         <div className="xl:col-start-1 xl:row-start-1">
           <ModuleNav
             modules={modules}
@@ -160,7 +160,7 @@ export default function App() {
             onClose={() => setNavOpen(false)}
           />
         </div>
-        <main className="flex min-w-0 flex-col gap-3 xl:col-start-2 xl:row-start-1">
+        <main className="flex min-w-0 flex-col gap-3 md:gap-2 xl:col-start-2 xl:row-start-1">
           <ProcessStepper modules={modules} currentId={step.id} done={done} onSelect={select} />
           <StepStage
             key={step.id}
@@ -188,7 +188,7 @@ export default function App() {
               />
             }
           />
-          <div className="sticky bottom-0 z-10 -mx-3 bg-white/95 px-3 py-2 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] backdrop-blur md:mx-0 md:rounded-2xl md:bg-[#f1f6f8]/95 md:shadow-none">
+          <div className="sticky bottom-0 z-10 -mx-3 bg-white/95 px-3 py-2 md:py-1.5 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] backdrop-blur md:mx-0 md:rounded-2xl md:bg-[#f1f6f8]/95 md:shadow-none">
             <Controls
               isFirst={isFirst}
               isLast={isLast}

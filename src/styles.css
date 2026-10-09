@@ -225,8 +225,12 @@ body {
    The screenshot's width is capped from the window height minus everything around it
    (header, topic strip, title, subtitles, player bar), so nothing needs scrolling. */
 .stage-fit {
-  --chrome: 30rem;
-  max-width: max(20rem, calc((100dvh - var(--chrome)) * 1.9));
+  --chrome: 17.5rem;
+  max-width: max(20rem, calc((100dvh - var(--chrome)) * 1.88));
+}
+/* Steps with a tip or warning line keep room for it under the subtitles. */
+.stage-fit.has-notes {
+  --chrome: 20.25rem;
 }
 @media (max-width: 767px) {
   .stage-fit { max-width: none; }
@@ -234,17 +238,17 @@ body {
 
 /* Subtitles: the sentence being spoken, as on a video player. */
 .subtitles {
-  margin-top: 0.5rem;
-  min-height: 3.9rem;
+  margin-top: 0.35rem;
+  min-height: 2.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 0.75rem;
   background: #0f2a36;
-  padding: 0.45rem 1rem;
+  padding: 0.3rem 1rem;
   text-align: center;
   color: #f1f5f9;
-  font-size: clamp(1rem, 0.55rem + 0.75vw, 1.3rem);
+  font-size: clamp(0.95rem, 0.6rem + 0.5vw, 1.15rem);
   font-weight: 500;
   line-height: 1.55;
 }
@@ -285,4 +289,12 @@ body {
   padding: 0.6rem 0.8rem;
   line-height: 1.7;
   color: #334155;
+}
+
+/* Small presenter: keep the name tag on one line */
+@media (min-width: 768px) {
+  .presenter-slot .avatar-tag {
+    white-space: nowrap;
+    font-size: 0.7rem;
+  }
 }
